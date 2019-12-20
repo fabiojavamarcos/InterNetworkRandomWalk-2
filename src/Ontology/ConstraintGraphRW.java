@@ -60,11 +60,11 @@ public class ConstraintGraphRW {
 	 * Creates a Graph from an OWLOntology
 	 * 
 	 * @param NormOnt
-	 * @param Log - error log
+	 * @param logBatch - error log
 	 * @return
 	 * @throws Exception 
 	 */
-	public Graph[] createGraph(Object[] NormOnt, JTextArea Log) throws Exception
+	public Graph[] createGraph(Object[] NormOnt, String logBatch) throws Exception
 	{
 		Graph gClass = new Graph();
 		Graph gProperty = new Graph();
@@ -403,9 +403,8 @@ public class ConstraintGraphRW {
 		*/
 			catch(Exception e)	
 			{
-				String str = Log.getText() + "\nError : Could not load ontology";
-	  		  	Log.setText(str);
-	  		  	System.out.println(str);// to show error when running in batch
+				System.out.println("\nError : Could not load ontology");
+	  		  	
 	  		  	throw e;
 			}
 		Graph [] gs = new Graph[2];
