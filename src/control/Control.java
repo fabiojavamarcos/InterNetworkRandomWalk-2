@@ -147,6 +147,7 @@ public class Control {
 		
 		OntologyManagerTab omt = new OntologyManagerTab();
 		omt.openBatch1(path, args[4]);
+		agOnt1 = omt.getAgOnt1();
 		
 		/*for (int i=3; i < args.length; i++){
 			
@@ -174,14 +175,19 @@ public class Control {
 				//runNet1Union(network1);
 				
 				// run first randonWalk
-				System.out.println("Running Random Walk n "+max+" times (max) in:"+args[4] );
-				RandomWalk rw1 = new RandomWalk(gOnt1, args[4], max);
+				System.out.println("Running Random Walk n "+max+" times (max) in Classes:"+args[4] );
+				RandomWalk rw0 = new RandomWalk(agOnt1[0], args[4], max);
 				//Random randRoot = new Random();
 				//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
 				//System.out.println("calling RandomWalk with root:"+ root + " selecting "+ gOnt1.getNumVertices());
 				//rw1.rw(root);
-				rw1.fullrw();
+				rw0.fullrw();
 				
+				System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
+				RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4], max);
+		
+				rw1.fullrw();
+						
 				//runNet2Union(network2);
 				
 				// run second randonWalk

@@ -214,7 +214,7 @@ public class ConstraintGraphRW {
 	        		}
 	        	}
 	        }
-		}//try
+		
 			//Stage 2 end
 /*			
 			//Stage 3 Start
@@ -373,14 +373,21 @@ public class ConstraintGraphRW {
                         g.insertEdge(notNodeL, notNodeK);
                 	}
             	}
-            }
+            } */
 	        //Stage 4 End
             System.out.println("\n Graph Constructed: \n");
 			//Graph2Console(g);
-			System.out.println("\n Tagging Bottom and Top Nodes: \n");
-            g = searchBottomNodes(g);
-			//Graph2Console(g);
-			//Graph2File(g);
+			//System.out.println("\n Tagging Bottom and Top Nodes: \n");
+            //g = searchBottomNodes(g);
+            System.out.println("Graph  Classes --------------------------");
+            System.out.println("Graph  Classes --------------------------");
+			Graph2Console(gClass);
+			System.out.println("Graph  Properties -----------------------");
+			System.out.println("Graph  Properties -----------------------");
+			Graph2Console(gProperty);
+			Graph2File(gProperty);
+			Graph2File(gClass);
+
 			System.out.println("\n Ontology loaded");
 			//Graph2Console(g);
 			//Time stamping
@@ -390,23 +397,17 @@ public class ConstraintGraphRW {
 			System.out.println(stamp);
 			writer.write(stamp);
 	        writer.close();
-		}
+		} //try
 		catch(Exception e)	
 		{
-			String str = Log.getText() + "\nError : Could not load ontology";
-  		  	Log.setText(str);
-  		  	System.out.println(str);// to show error when running in batch
-  		  	throw e;
+			System.out.println("\nError : Could not load ontology");
+			  	
+			  	throw e;
 		}
 		
-		return g;
-		*/
-			catch(Exception e)	
-			{
-				System.out.println("\nError : Could not load ontology");
-	  		  	
-	  		  	throw e;
-			}
+		//return g;
+		
+			
 		Graph [] gs = new Graph[2];
 		gs[0] = gClass;
 		gs[1] = gProperty;
@@ -576,6 +577,7 @@ public class ConstraintGraphRW {
 			vertices = g.getVertices();
 			adj = g.getAdj();
 			Graph2Console(g);
+			/*
 			//int tempSize = adj.size();
 			for(int j = 0; j < adj.size(); j++) 
 			{
@@ -729,6 +731,7 @@ public class ConstraintGraphRW {
             }
             //*/
 	        //Stage 4 End
+			
             System.out.println("\n Graph Constructed: \n");
 			//Graph2Console(g);
 			System.out.println("\n Tagging Bottom and Top Nodes: \n");

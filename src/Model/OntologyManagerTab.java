@@ -114,7 +114,151 @@ public class OntologyManagerTab extends JFrame {
             */
     private Graph gOnt1; 				//Graph for Ontology 1
     private Graph [] agOnt1; 				//Array Graph for Ontology 1
-    private String IRIOnt1;				//IRI for the original Ontology 1
+    public boolean isHideIRI1() {
+		return HideIRI1;
+	}
+
+	public void setHideIRI1(boolean hideIRI1) {
+		HideIRI1 = hideIRI1;
+	}
+
+	public boolean isHideIRI2() {
+		return HideIRI2;
+	}
+
+	public void setHideIRI2(boolean hideIRI2) {
+		HideIRI2 = hideIRI2;
+	}
+
+	public boolean isHideIRIResults() {
+		return HideIRIResults;
+	}
+
+	public void setHideIRIResults(boolean hideIRIResults) {
+		HideIRIResults = hideIRIResults;
+	}
+
+	public String getPathOnt1() {
+		return pathOnt1;
+	}
+
+	public void setPathOnt1(String pathOnt1) {
+		this.pathOnt1 = pathOnt1;
+	}
+
+	public String getNameOnt1() {
+		return nameOnt1;
+	}
+
+	public void setNameOnt1(String nameOnt1) {
+		this.nameOnt1 = nameOnt1;
+	}
+
+	public Object[] getOnt1() {
+		return Ont1;
+	}
+
+	public void setOnt1(Object[] ont1) {
+		Ont1 = ont1;
+	}
+
+	public Graph getgOnt1() {
+		return gOnt1;
+	}
+
+	public void setgOnt1(Graph gOnt1) {
+		this.gOnt1 = gOnt1;
+	}
+
+	public Graph[] getAgOnt1() {
+		return agOnt1;
+	}
+
+	public void setAgOnt1(Graph[] agOnt1) {
+		this.agOnt1 = agOnt1;
+	}
+
+	public String getIRIOnt1() {
+		return IRIOnt1;
+	}
+
+	public void setIRIOnt1(String iRIOnt1) {
+		IRIOnt1 = iRIOnt1;
+	}
+
+	public String getPathOnt2() {
+		return pathOnt2;
+	}
+
+	public void setPathOnt2(String pathOnt2) {
+		this.pathOnt2 = pathOnt2;
+	}
+
+	public String getNameOnt2() {
+		return nameOnt2;
+	}
+
+	public void setNameOnt2(String nameOnt2) {
+		this.nameOnt2 = nameOnt2;
+	}
+
+	public Object[] getOnt2() {
+		return Ont2;
+	}
+
+	public void setOnt2(Object[] ont2) {
+		Ont2 = ont2;
+	}
+
+	public Graph getgOnt2() {
+		return gOnt2;
+	}
+
+	public void setgOnt2(Graph gOnt2) {
+		this.gOnt2 = gOnt2;
+	}
+
+	public Graph[] getAgOnt2() {
+		return agOnt2;
+	}
+
+	public void setAgOnt2(Graph[] agOnt2) {
+		this.agOnt2 = agOnt2;
+	}
+
+	public String getIRIOnt2() {
+		return IRIOnt2;
+	}
+
+	public void setIRIOnt2(String iRIOnt2) {
+		IRIOnt2 = iRIOnt2;
+	}
+
+	public Graph getgResults() {
+		return gResults;
+	}
+
+	public void setgResults(Graph gResults) {
+		this.gResults = gResults;
+	}
+
+	public String getPathOntResults() {
+		return pathOntResults;
+	}
+
+	public void setPathOntResults(String pathOntResults) {
+		this.pathOntResults = pathOntResults;
+	}
+
+	public String getNameOntResults() {
+		return nameOntResults;
+	}
+
+	public void setNameOntResults(String nameOntResults) {
+		this.nameOntResults = nameOntResults;
+	}
+
+	private String IRIOnt1;				//IRI for the original Ontology 1
     private String pathOnt2; 			//Ontology2 Path
     private String nameOnt2; 			//Ontology2 Name
     private Object[] Ont2;				//Object used to store Ontology 2
@@ -3434,6 +3578,7 @@ public class OntologyManagerTab extends JFrame {
 					//String str;
 					try{
 						str = LogBatch;
+						/*//normalization stuff
     					Normalization norm = new Normalization();
     					Object[] o = norm.runOntologyNormalization(pathOnt1, nameOnt1, osType);
     	    			String pathNorm = o[0].toString();
@@ -3447,29 +3592,34 @@ public class OntologyManagerTab extends JFrame {
 		    				return;
 		    			}
 		    			IRIOnt1 = o[1].toString();
+		    			*/
 		    			System.out.print("\n Original IRI Ontology 1: " + IRIOnt1 + "\n");
-		    			Ont1 = loadOntBatch(pathNorm);
+		    			//Ont1 = loadOntBatch(pathNorm);
+		    			Ont1 = loadOntBatch(pathOnt1); // run without normalization
 		    			ConstraintGraphRW r = new ConstraintGraphRW();
 		    			agOnt1 = new Graph[2];
-		    			agOnt1 = r.createGraph(Ont1, LogBatch);
+		    			agOnt1 = r.createGraph(Ont1, LogBatch); // graph split class and properties
+		    			gOnt1 = r.createGraphBatch(Ont1,LogBatch); // Graph together
 		    			
 		    			// store to use later without open files ou process normalization and graphs again
-		    			Object [] OntAUX = new Object [7];
+		    			Object [] OntAUX = new Object [8];
 		    		    /*		obj[0] = ontology;
 		    			obj[1] = factory;
 		    			obj[2] = manager;
 		    		    obj[3] = ontPath;
 		    		    obj[4] = ontName;
-		    		    obj[5] = graph;
+		    		    obj[5] = graph; //class
 		    		    obj[6] = IRI;
+		    		    obj[7] = graph; // property
 		    		*/
 		    			OntAUX[0] = Ont1[0];
 		    			OntAUX[1] = Ont1[1];
 		    			OntAUX[2] = Ont1[2];
 		    			OntAUX[3] = Ont1[3];
 		    			OntAUX[4] = file;
-		    			OntAUX[5] = gOnt1;
+		    			OntAUX[5] = agOnt1[0];
 		    			OntAUX[6] = IRIOnt1;
+		    			OntAUX[7] = agOnt1[1];
 		    			 
 		    			ontologiesProcessed.add(OntAUX); 
 		    			
@@ -4729,13 +4879,19 @@ public class OntologyManagerTab extends JFrame {
 				//runNet1Union(network1);
 				
 				// run first randonWalk
-				System.out.println("Running Random Walk n "+max+" times (max) in:"+args[4] );
-				RandomWalk rw1 = new RandomWalk(gOnt1, args[4], max);
+				System.out.println("Running Random Walk n "+max+" times (max) in Classes:"+args[4] );
+				RandomWalk rw0 = new RandomWalk(agOnt1[0], args[4], max);
 				//Random randRoot = new Random();
 				//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
 				//System.out.println("calling RandomWalk with root:"+ root + " selecting "+ gOnt1.getNumVertices());
 				//rw1.rw(root);
+				rw0.fullrw();
+				
+				System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
+				RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4], max);
+
 				rw1.fullrw();
+
 				
 				//runNet2Union(network2);
 				
