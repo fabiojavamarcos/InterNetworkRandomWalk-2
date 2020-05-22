@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import Model.Visit;
+
 
 /**
  * This Class implements the Breadth First Search algorithm over the Graph Class to discover if there are paths between certain nodes
@@ -28,11 +30,75 @@ public class RandomWalk {
 	private Boolean calculatedFull;
 	private ArrayList <Integer> overAllVisits; //summarizes visits
 	private HashMap<Node, Node> visited_ant = new HashMap<Node, Node>();
-	FileWriter writer = null;
-	
+	private FileWriter writer = null;
+	private ArrayList<Visit> visitList= new ArrayList();
 	private String name;
+	private String printAnt = "";
 	private int max;
+	private String pathcsv;
+	private String setBreakIfBackToNode;
+    private String randomizeFirstNodeEachRW;
+    private String restartSameRWIfLoop;
+    private String trace;
+    private int forceStartNodeNummber;
 	
+	public int getForceStartNodeNummber() {
+		return forceStartNodeNummber;
+	}
+
+	public void setForceStartNodeNummber(int forceStartNodeNummber) {
+		this.forceStartNodeNummber = forceStartNodeNummber;
+	}
+
+	public int getMax() {
+		return max;
+	}
+
+	public void setMax(int max) {
+		this.max = max;
+	}
+
+	public String getPathcsv() {
+		return pathcsv;
+	}
+
+	public void setPathcsv(String pathcsv) {
+		this.pathcsv = pathcsv;
+	}
+
+
+	public String getSetBreakIfBackToNode() {
+		return setBreakIfBackToNode;
+	}
+
+	public void setSetBreakIfBackToNode(String setBreakIfBackToNode) {
+		this.setBreakIfBackToNode = setBreakIfBackToNode;
+	}
+
+	public String getRandomizeFirstNodeEachRW() {
+		return randomizeFirstNodeEachRW;
+	}
+
+	public void setRandomizeFirstNodeEachRW(String randomizeFirstNodeEachRW) {
+		this.randomizeFirstNodeEachRW = randomizeFirstNodeEachRW;
+	}
+
+	public String getTrace() {
+		return trace;
+	}
+
+	public void setTrace(String trace) {
+		this.trace = trace;
+	}
+
+	public String getRestartSameRWIfLoop() {
+		return restartSameRWIfLoop;
+	}
+
+	public void setRestartSameRWIfLoop(String restartSameRWIfLoop) {
+		this.restartSameRWIfLoop = restartSameRWIfLoop;
+	}
+
 	public RandomWalk() 
 	{
 		this.g = null;
@@ -77,7 +143,7 @@ public class RandomWalk {
 		}
 		if(this.calculated[idO]==0)
 		{//calculate bfs
-			rw(idO);
+			rw(idO,0); // ??? idO,0?
 			this.calculated[idO] = 1;
 		}
 		//search the visited nodes for answer
@@ -97,7 +163,7 @@ public class RandomWalk {
 	 * 
 	 * @param root
 	 */
-	public void rw(int root)
+	public void rw(int root, int loop)
 	{
 		ArrayList<Integer> visited = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 		Queue<Integer> queue = new LinkedList<Integer>();
@@ -134,13 +200,18 @@ public class RandomWalk {
     		obs = "Rest Complemento Rest Cardinalidade "+ noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
     	}
 	    printName(nodeRoot.getFullName(), obs);
-	    visited_ant.put(nodeRoot, null);
+	    visited_ant.put(nodeRoot, null); // dataset with dad child visit
 	    int total = overAllVisits.get(root);
 	    total++;
-	    overAllVisits.set(root, total);
+	    overAllVisits.set(root, total); //dataset with total number of visits per node
+	    Visit vis = new Visit();
+	    vis.setLoop(loop);
+	    vis.setNode(nodeRoot);
+	    vis.setHop(0);
+	    visitList.add(vis); // dataset with the order of visit
 	    int countVisited = 0;
 	    //while(!queue.isEmpty())
-	    while (countVisited < max)
+	    while (countVisited < max) // n√£o precisa limitar em n√∫mero = max. Tem que limitar apenas pra n√£o ficar em loop eterno.
 	    {
 	    	// inserir aqui o random para ver qual n√≥ seguir
 	    	
@@ -150,97 +221,135 @@ public class RandomWalk {
 	    	//if(!this.g.isAdjEmpty(root))
 	        //{
 	        	//LinkedList<Integer> tempChilds = tempAdj.get(root);
-	    		LinkedList<Integer> tempChilds = g.getList(root);
-	        	if(tempChilds != null && tempChilds.size() > 0)
-	        	{
-	        		// position random will be one of the tempChilds.
-	        		int possibilities = tempChilds.size();
-	        		//int randomPosition = (int)(Math.random()*possibilities)+1; // check to avoid bias
-	        		//Random rand = new Random();
+        	if(this.getTrace().contentEquals("Y"))
 
-	        		// nextInt as provided by Random is exclusive of the top value so you need to add 1 
+	    	    System.out.println("I am in : "+ root);
+    		LinkedList<Integer> tempChilds = g.getList(root);
+        	if(tempChilds != null && tempChilds.size() > 0)
+        	{
+        		// position random will be one of the tempChilds.
+        		int possibilities = tempChilds.size();
+        		//int randomPosition = (int)(Math.random()*possibilities)+1; // check to avoid bias
+        		//Random rand = new Random();
 
-	        		//int randomPosition = rand.nextInt((possibilities - 1) + 1) + 1;
-	        		//int randomPosition = rand.nextInt((possibilities - 1) + 1);
-	        		float sorteio = (float)(Math.random()*(possibilities-1))+1;
-	        		int randomPosition = Math.round(sorteio);
-	        		//System.out.println(" position: "+ randomPosition + "from 1 to "+possibilities);
-	        		Iterator<Integer> iterator = tempChilds.listIterator();
-	        		int count = 1;
-	        		while(iterator.hasNext())// est√° lendo menos 1!!! certificar o n√∫mero de elementos na lista de adjac√™ncia
-	        		//do 
-	        		{
-	        			int child = iterator.next();
-	        			//int child2 = tempChilds.get(randomPosition);// est√° errado! tem que pegar um elemento do tempChilds dentro da linked list
-	        			//System.out.println("Child to evaluate:" + child);
-	        			//System.out.println("Child to evaluate 2:" + child2);
-                        //if (visited.get(child)==0) 
-	        			//System.out.println("testing if child "+ child + " have been visited " + visited.get(child) + " and if count "+ count + " == "+ randomPosition );
-	        			//if (visited.get(child)==0 && count==randomPosition) 
-	        			if (count==randomPosition)
-                        {
-	        				int visits = visited.get(child);
-	        				visits++;
-	        				//System.out.println("Child to visit:" + child + " number of times in this rw " + visits);
-                        	visited.set(child,visits); // acho que este cara tem que ficar dentro do if para somente contar qdo n„o for o ˙nico caminho possÌvel e igual ao pai dentro da mesma rw (dentro da full rw pode) 
-                        	
-                        	Node nodeVisited = grafo.get(child);
-                        	tipo = nodeVisited.getNodeType();
-                        	obs = "nada";
-                        	if (tipo == NodeType.Class) {
-                        		NodeClass noClasse = (NodeClass) nodeVisited;
-                        		obs =  "classe "+noClasse.getDescClass();
-                        	} 
-                        	if (tipo == NodeType.Property) {
-                        		NodeProperty noPropriedade = (NodeProperty) nodeVisited;
-                        		obs = "Propriedade "+noPropriedade.getDescProp();
-                        	}
-                        	if (tipo == NodeType.RestrictionComplementOfClass) {
-                        		NodeRestrictionComplementOfClass noRestCompClass = (NodeRestrictionComplementOfClass) nodeVisited;
-                        		obs = "Rest classe complemento " +noRestCompClass.getDescClass();
-                        	}
-                        	if (tipo == NodeType.RestrictionComplementOfProperty) {
-                        		NodeRestrictionComplementOfProperty noRestCompProp = (NodeRestrictionComplementOfProperty) nodeVisited;
-                        		obs = "Rest propriedade complemento "+noRestCompProp.getDescProp();
-                        	}
-                        	if (tipo == NodeType.RestrictionCardinality) {
-                        		NodeRestrictionCardinality noRestCard = (NodeRestrictionCardinality) nodeVisited;
-                        		obs = "Rest Cardinalidade "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
-                        	}
-                        	if (tipo == NodeType.RestrictionComplementOfRestrictionCardinality) {
-                        		NodeRestrictionComplementOfRestrictionCardinality noRestCompCard = (NodeRestrictionComplementOfRestrictionCardinality) nodeVisited;
-                        		obs = "Rest Complemento Rest Cardinalidade "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
-                        	}
-                        	visited_ant.put(nodeVisited, nodeRoot);
-                        	if (visits < 2) // to only print once the node (!?) verificar se ok - n„o deveria marcar como visitado aqui denro???? Na verdade n„o estou descartando ninguÈm!!! SÛ no python
-                        		printName(nodeVisited.getFullName(), obs);
-                        	
-                        	total = overAllVisits.get(child);
-                    	    total++;
-                    	    overAllVisits.set(child, total);
-                    	    imprime(nodeRoot.getFullName(),nodeVisited.getFullName(), total);
-                    	    
-                        	queue.add(child);
-                        	LinkedList<Integer> tempR = this.reachable.get(root);
-                        	tempR.add(child);
-                        	// now the child became root 
-                         	root = child;
-                         	nodeRoot = nodeVisited;
-                        	
-                        	countVisited++;
-                        	//System.out.println("count visited "+countVisited);
-                        	
-                        }
-	        			
-	        			count++;
-	        			//System.out.println("count "+count);
-	        			
-	        		}//while(iterator.hasNext());
-	        	}
-	        	//System.out.println(" (root): " + root + " Visited "+ visited.get(root));
-	        	if (visited.get(root)>1) { // se este root j· foi nesta rw n„o repete
+        		// nextInt as provided by Random is exclusive of the top value so you need to add 1 
+
+        		//int randomPosition = rand.nextInt((possibilities - 1) + 1) + 1;
+        		//int randomPosition = rand.nextInt((possibilities - 1) + 1);
+        		int randomPosition = 0;
+        		if (this.getSetBreakIfBackToNode().equals("N")) {
+        			float sorteio = (float)(Math.random()*(possibilities-1))+1;
+            		randomPosition = Math.round(sorteio);
+				} else {
+					float sorteio = (float)(Math.random()*(possibilities-2))+2; // excludes the first position in adj matrix that is always a link to yourself
+            		randomPosition = Math.round(sorteio);
+				}
+        		
+        		if(this.getTrace().contentEquals("Y"))
+        			System.out.println(" position: "+ randomPosition + "from 1 to "+possibilities);
+        		Iterator<Integer> iterator = tempChilds.listIterator();
+        		
+        		int count = 1;
+        		while(iterator.hasNext())// est√° lendo menos 1!!! certificar o n√∫mero de elementos na lista de adjac√™ncia
+        		//do 
+        		{
+        			int child = iterator.next();
+        			//int child2 = tempChilds.get(randomPosition);// est√° errado! tem que pegar um elemento do tempChilds dentro da linked list
+    	        	if(this.getTrace().contentEquals("Y"))
+    	        		System.out.println("Child to evaluate:" + child);
+        			//System.out.println("Child to evaluate 2:" + child2);
+                    //if (visited.get(child)==0) 
+    	        	if(this.getTrace().contentEquals("Y"))
+    	        		System.out.println("child "+ child + " #visits until now: " + visited.get(child) + " and check if "+ count + " == position to visit: " + randomPosition );
+        			//if (visited.get(child)==0 && count==randomPosition) 
+        			if (count==randomPosition)
+                    {
+        				int visits = visited.get(child);
+        				
+                       	//if (visits < 2) {// to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
+                    		//printName(nodeVisited.getFullName(), obs);
+ 
+	        			visits++;
+	        	        if(this.getTrace().contentEquals("Y"))
+
+        	        		System.out.println("Child to visit:" + child + " number of times in this rw: " + visits);
+                    	visited.set(child,visits); // acho que este cara tem que ficar dentro do if para somente contar qdo nao for o unico caminho possivel e igual ao pai dentro da mesma rw (dentro da full rw pode) 
+                    	
+                    	Node nodeVisited = grafo.get(child);
+                    	tipo = nodeVisited.getNodeType();
+                    	obs = visits+"";
+                    	printName(nodeVisited.getFullName(), obs);
+                    	
+                    	if (tipo == NodeType.Class) {
+                    		NodeClass noClasse = (NodeClass) nodeVisited;
+                    		obs =  "classe "+noClasse.getDescClass();
+                    	} 
+                    	if (tipo == NodeType.Property) {
+                    		NodeProperty noPropriedade = (NodeProperty) nodeVisited;
+                    		obs = "Propriedade "+noPropriedade.getDescProp();
+                    	}
+                    	if (tipo == NodeType.RestrictionComplementOfClass) {
+                    		NodeRestrictionComplementOfClass noRestCompClass = (NodeRestrictionComplementOfClass) nodeVisited;
+                    		obs = "Rest classe complemento " +noRestCompClass.getDescClass();
+                    	}
+                    	if (tipo == NodeType.RestrictionComplementOfProperty) {
+                    		NodeRestrictionComplementOfProperty noRestCompProp = (NodeRestrictionComplementOfProperty) nodeVisited;
+                    		obs = "Rest propriedade complemento "+noRestCompProp.getDescProp();
+                    	}
+                    	if (tipo == NodeType.RestrictionCardinality) {
+                    		NodeRestrictionCardinality noRestCard = (NodeRestrictionCardinality) nodeVisited;
+                    		obs = "Rest Cardinalidade "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
+                    	}
+                    	if (tipo == NodeType.RestrictionComplementOfRestrictionCardinality) {
+                    		NodeRestrictionComplementOfRestrictionCardinality noRestCompCard = (NodeRestrictionComplementOfRestrictionCardinality) nodeVisited;
+                    		obs = "Rest Complemento Rest Cardinalidade "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
+                    	}
+                    	visited_ant.put(nodeVisited, nodeRoot); // dataset with dad child visits 
+                    	//if (visits < 2) // to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
+                    		//printName(nodeVisited.getFullName(), obs);
+                    	
+                    	total = overAllVisits.get(child);
+                	    total++;
+                	    overAllVisits.set(child, total); // dataset with total visits per node
+                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total);
+                	    
+                	    vis = new Visit();
+                	    vis.setLoop(loop);
+                	    vis.setNode(nodeVisited);
+                	    vis.setHop(countVisited);
+                	    visitList.add(vis); // dataset with the order of visit
+                	    
+                    	queue.add(child);
+                    	LinkedList<Integer> tempR = this.reachable.get(root);
+                    	tempR.add(child);
+                    	// now the child became root 
+                     	root = child;
+                     	nodeRoot = nodeVisited;
+                    	
+                    	countVisited++;
+        	        	if(this.getTrace().contentEquals("Y"))
+
+        	        		System.out.println("rw loop "+countVisited);
+                       	//}
+                    	
+                    }
+        			
+        			count++;
+        			if(this.getTrace().contentEquals("Y"))
+        				System.out.println("count "+count);
+        			
+        		}//while(iterator.hasNext());
+        	}
+        	if(this.getTrace().contentEquals("Y"))
+        		System.out.println(" (new root): " + root + " Visited #"+ visited.get(root));
+        	if(this.getRestartSameRWIfLoop().contentEquals("Y")) {
+	        	if (visited.get(root)>1) { // se este root jah foi nesta rw nao repete
+		        	if(this.getTrace().contentEquals("Y"))
+
+		        		System.out.println("Vazando pq: estou em: " + root + " e jah visitei esse cara # vezes: "+ visited.get(root));
 	        		break;
 	        	}
+			}
 	       // }
 	    }
 	}
@@ -255,44 +364,49 @@ public class RandomWalk {
 		int sumVertices = cont.size();
 	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 
-	    String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
-        writer = null;
-        
-		try {
-			writer = new FileWriter(fileName);
-			writer.append("root");
-			writer.append(",");
-			writer.append("child");
-			writer.append(",");
-			writer.append("incremental visits\n");
-
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        
+	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
+	           
         int count = 0;
         while (count < max) {
         	Iterator i = (Iterator) cont.iterator();
         	int countEntries = 0;
         	int randomInit = (int) (Math.random()*(sumVertices-1))+1;
-        	//System.out.println("count: "+ count);
-        	//System.out.println(" Count Entries "+countEntries);
-        	//System.out.println(" randomInit "+ randomInit);
+        	
+        	if(this.getForceStartNodeNummber()<sumVertices) {
+        		randomInit = this.getForceStartNodeNummber(); // start always from the same vertice (ramdom must be Y)
+        		// to avoid that use a number over the last vertice size
+        	}
+        	if(this.getTrace().contentEquals("Y")) {
+        		System.out.println("count: "+ count);
+        		System.out.println(" Count Entries "+countEntries);
+        		System.out.println(" randomInit "+ randomInit);
+        	}
 	        while(i.hasNext()) 
 	        {
 	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
 	        	int nID = n.getValue().getId();
 	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
-	        	if (countEntries == randomInit){
-	        		//printName(n.getValue().getFullName());
-	        		rw(nID);
+	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) { // each rw will start once with only the random node as root
+		        	if (countEntries == randomInit){ //random start
+		        		printName(n.getValue().getFullName(), nID+"");
+		        		rw(nID, count);
+		        		//printVisitOrder(count);
+		        		//printFrequency(count, cont);
+		        		//printAnt(count);
+		        	}
+	        	} else { // each rw will start once with each node as root. So 100 rw will be: 100 * number of nodes
+	        		printName(n.getValue().getFullName(), nID+""); 
+	        		rw(nID, count);
+
 	        	}
 				this.calculated[nID] = 1;
 				countEntries++;
 	        }
 	        count ++;
         }
+        printVisitOrder(count);
+		printFrequency(count, cont);
+		printAnt(count);
         this.calculatedFull = true;
         // fecha o arquivo de ordem de visita
 		try {
@@ -304,33 +418,9 @@ public class RandomWalk {
 			e1.printStackTrace();
 		}
 
-        // print frequency
-        Iterator it = (Iterator) cont.iterator();
-        fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
-        writer = null;
-        try {
-			writer = new FileWriter(fileName);
-			writer.append("node");
-			writer.append(",");
-			writer.append("visits\n");
-	        while (it.hasNext()) {
-	        	Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
-	        	int nIDiT = nIt.getValue().getId();
-	        	int totalVisits = overAllVisits.get(nIDiT);
-	        	System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
-	        
-					writer.append(formatName(nIt.getValue().getFullName()));
-					writer.append(",");
-					writer.append(totalVisits+"\n");
-	        	
-	        }
-        
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+	    
+ 
         
         // print the visit chain root and child
         /*
@@ -367,6 +457,84 @@ public class RandomWalk {
         //}
 	}
 	
+	private void printVisitOrder(int count) {
+		// print visit order
+        Iterator it = (Iterator) visitList.iterator();
+        
+        //String fileName = System.getProperty("user.home")+"/visits_order_"+name+".csv";
+        String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_order_"+name+".csv";
+        writer = null;
+        try {
+			writer = new FileWriter(fileName);
+			writer.append("nodeId,nodeName,nodeType,nodeLevel,loop,hop\n");
+			//writer.append(",");
+			//writer.append("visits\n");
+	        while (it.hasNext()) {
+	        	Visit v = (Visit) it.next();
+	        	
+	        	Node nd = v.getNode();
+	        	int hop = v.getHop();
+	        	int loop = v.getLoop();
+	        	int ndId = nd.getId();
+	        	String ndName = nd.getFullName();
+	        	NodeType ndType = nd.getNodeType();
+	        	String typeName = ndType.name();
+	        	int ndLevel = nd.getLevel();
+	        	if(this.getTrace().contentEquals("Y"))
+	        		System.out.println(" node: " + ndId + " nome " + formatName(ndName) + " type: "+ typeName + " level: "+ ndLevel + " loop: "+ loop + " hop: "+ hop);
+	        
+				writer.append(ndId+",");
+				
+				writer.append(formatName(ndName)+",");
+				writer.append(typeName+",");
+				writer.append(ndLevel+",");
+				writer.append(loop+",");
+				//writer.append(hop+",");
+				writer.append(hop+"\n");
+        	
+	        }
+        
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+	}
+	
+	private void printFrequency(int count, Set cont) {
+	       // print frequency
+        Iterator it = (Iterator) cont.iterator();
+        //fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
+        String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
+        writer = null;
+        try {
+			writer = new FileWriter(fileName);
+			writer.append("node");
+			writer.append(",");
+			writer.append("visits\n");
+	        while (it.hasNext()) {
+	        	Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
+	        	int nIDiT = nIt.getValue().getId();
+	        	int totalVisits = overAllVisits.get(nIDiT);
+	        	if(this.getTrace().contentEquals("Y"))
+
+	        		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
+	        
+				writer.append(formatName(nIt.getValue().getFullName()));
+				writer.append(",");
+				writer.append(totalVisits+"\n");
+	        	
+	        }
+        
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private void printName(String nodeFullName, String obs) {
 		// TODO Auto-generated method stub
 		//if (n.getValue().getId()==290){
@@ -380,10 +548,14 @@ public class RandomWalk {
 			}
 			String nodeName = nodeFullName.substring(initialPosition+1,finalPosition);
 			//String nodeName = n.getValue().getFullName().substring(initialPosition+1);
-			System.out.println(" visitei: " + nodeName + " "+ obs);
+        	if(this.getTrace().contentEquals("Y"))
+
+        		System.out.println(" visitei: " + nodeName + " "+ obs);
 			
 		} else {
-			System.out.println(" descartei: " + nodeFullName + " "+ obs);
+        	if(this.getTrace().contentEquals("Y"))
+
+        		System.out.println(" descartei: " + nodeFullName + " "+ obs);
 		}
 			
 	}
@@ -409,8 +581,32 @@ public class RandomWalk {
 			
 	}
 	
-	private void imprime(String rootName, String nodeName, int visits) {
+	private void accumulateAnt(int root, String rootName, int child, String nodeName, int visits) {
+		printAnt = printAnt + root + ","+ formatName(rootName) + ","+ child + ","+ formatName(nodeName) + ","+ visits + "\n";
+	}
+	private void printAnt(int count) {
+		 String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_ant_"+name+".csv";
+	     writer = null;
+        
 		try {
+			writer = new FileWriter(fileName);
+			writer.append("rootId");
+			writer.append(",");
+			writer.append("root");
+			writer.append(",");
+			writer.append("childId");
+			writer.append(",");
+			writer.append("child");
+			writer.append(",");
+			writer.append("incremental visits\n");
+			writer.append(printAnt);
+
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		/*try {
 			writer.append(formatName(rootName));
 			writer.append(",");
 			writer.append(formatName(nodeName));
@@ -420,7 +616,7 @@ public class RandomWalk {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	/**
