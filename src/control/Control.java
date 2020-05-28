@@ -100,6 +100,7 @@ public class Control {
     private String trace; // Y show prints
     private int forceStartNodeNummber; // number indicating the node to start always at each rw. if number > size of vertices use the ramdom 
     private String runMode; // C = class, P = properties, B = Both
+     
     
 	/**
 	 *  function that run in batch loading ontologies from args
@@ -142,6 +143,7 @@ public class Control {
 	    trace = args[9];
 	    forceStartNodeNummber = Integer.parseInt(args[10]);
 	    runMode = args[11];
+	    
 		if (runMode.equals("B")) {		
 			// run first randonWalk
 			System.out.println("Running Random Walk n "+max+" times (max) in Classes:"+args[4] );

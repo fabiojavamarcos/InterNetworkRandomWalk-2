@@ -41,7 +41,16 @@ public class RandomWalk {
     private String restartSameRWIfLoop;
     private String trace;
     private int forceStartNodeNummber;
+    private String runAllNodesOnce;
 	
+	public String getRunAllNodesOnce() {
+		return runAllNodesOnce;
+	}
+
+	public void setRunAllNodesOnce(String runAllNodesOnce) {
+		this.runAllNodesOnce = runAllNodesOnce;
+	}
+
 	public int getForceStartNodeNummber() {
 		return forceStartNodeNummber;
 	}
@@ -143,7 +152,7 @@ public class RandomWalk {
 		}
 		if(this.calculated[idO]==0)
 		{//calculate bfs
-			rw(idO,0); // ??? idO,0?
+			ArrayList<Integer> vis = rw(idO,0); // ??? idO,0?
 			this.calculated[idO] = 1;
 		}
 		//search the visited nodes for answer
@@ -163,7 +172,7 @@ public class RandomWalk {
 	 * 
 	 * @param root
 	 */
-	public void rw(int root, int loop)
+	public ArrayList rw(int root, int rwNumber)
 	{
 		ArrayList<Integer> visited = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 		Queue<Integer> queue = new LinkedList<Integer>();
@@ -205,13 +214,14 @@ public class RandomWalk {
 	    total++;
 	    overAllVisits.set(root, total); //dataset with total number of visits per node
 	    Visit vis = new Visit();
-	    vis.setLoop(loop);
+	    vis.setRwNumber(rwNumber);
 	    vis.setNode(nodeRoot);
 	    vis.setHop(0);
 	    visitList.add(vis); // dataset with the order of visit
 	    int countVisited = 0;
 	    //while(!queue.isEmpty())
-	    while (countVisited < max) // não precisa limitar em número = max. Tem que limitar apenas pra não ficar em loop eterno.
+	    boolean hasPath = true;
+	    while (hasPath) // não precisa limitar em número = max. Tem que limitar apenas pra não ficar em loop eterno.
 	    {
 	    	// inserir aqui o random para ver qual nó seguir
 	    	
@@ -225,7 +235,7 @@ public class RandomWalk {
 
 	    	    System.out.println("I am in : "+ root);
     		LinkedList<Integer> tempChilds = g.getList(root);
-        	if(tempChilds != null && tempChilds.size() > 0)
+        	if(tempChilds != null && tempChilds.size() > 1)
         	{
         		// position random will be one of the tempChilds.
         		int possibilities = tempChilds.size();
@@ -246,10 +256,10 @@ public class RandomWalk {
 				}
         		
         		if(this.getTrace().contentEquals("Y"))
-        			System.out.println(" position: "+ randomPosition + "from 1 to "+possibilities);
+        			System.out.println(" position: "+ randomPosition + " from 1 to "+possibilities);
         		Iterator<Integer> iterator = tempChilds.listIterator();
         		
-        		int count = 1;
+        		int tries = 1;
         		while(iterator.hasNext())// está lendo menos 1!!! certificar o número de elementos na lista de adjacência
         		//do 
         		{
@@ -260,9 +270,9 @@ public class RandomWalk {
         			//System.out.println("Child to evaluate 2:" + child2);
                     //if (visited.get(child)==0) 
     	        	if(this.getTrace().contentEquals("Y"))
-    	        		System.out.println("child "+ child + " #visits until now: " + visited.get(child) + " and check if "+ count + " == position to visit: " + randomPosition );
+    	        		System.out.println("child "+ child + " #visits until now: " + visited.get(child) + " and check if "+ tries + " == position to visit: " + randomPosition );
         			//if (visited.get(child)==0 && count==randomPosition) 
-        			if (count==randomPosition)
+        			if (tries==randomPosition)
                     {
         				int visits = visited.get(child);
         				
@@ -312,9 +322,11 @@ public class RandomWalk {
                 	    total++;
                 	    overAllVisits.set(child, total); // dataset with total visits per node
                 	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total);
-                	    
+ 
+                       	countVisited++;
+                        
                 	    vis = new Visit();
-                	    vis.setLoop(loop);
+                	    vis.setRwNumber(rwNumber);
                 	    vis.setNode(nodeVisited);
                 	    vis.setHop(countVisited);
                 	    visitList.add(vis); // dataset with the order of visit
@@ -326,19 +338,23 @@ public class RandomWalk {
                      	root = child;
                      	nodeRoot = nodeVisited;
                     	
-                    	countVisited++;
         	        	if(this.getTrace().contentEquals("Y"))
 
-        	        		System.out.println("rw loop "+countVisited);
+        	        		System.out.println("rw hop "+countVisited);
                        	//}
                     	
                     }
         			
-        			count++;
+        			tries++;
         			if(this.getTrace().contentEquals("Y"))
-        				System.out.println("count "+count);
+        				System.out.println("count "+tries);
         			
         		}//while(iterator.hasNext());
+        	}
+        	else { //tempChils == null or tempChild <2 tempChilds == 1 means we have only link to itself = no outlet !!!
+        		hasPath=false;
+        		if(this.getTrace().contentEquals("Y"))
+            		System.out.println(" No outlet! " + root + " Visited #"+ visited.get(root));
         	}
         	if(this.getTrace().contentEquals("Y"))
         		System.out.println(" (new root): " + root + " Visited #"+ visited.get(root));
@@ -351,7 +367,10 @@ public class RandomWalk {
 	        	}
 			}
 	       // }
-	    }
+	    } //while(hasPath)
+	    if(this.getTrace().contentEquals("Y"))
+    		System.out.println(" Exit RW " + root + " Visited #"+ visited.get(root));
+	    return visited;
 	}
 	
 	/**
@@ -366,8 +385,8 @@ public class RandomWalk {
 
 	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
 	           
-        int count = 0;
-        while (count < max) {
+        int rwNumber = 0;
+        while (rwNumber < max) {
         	Iterator i = (Iterator) cont.iterator();
         	int countEntries = 0;
         	int randomInit = (int) (Math.random()*(sumVertices-1))+1;
@@ -377,7 +396,7 @@ public class RandomWalk {
         		// to avoid that use a number over the last vertice size
         	}
         	if(this.getTrace().contentEquals("Y")) {
-        		System.out.println("count: "+ count);
+        		System.out.println("rw number: "+ rwNumber);
         		System.out.println(" Count Entries "+countEntries);
         		System.out.println(" randomInit "+ randomInit);
         	}
@@ -386,27 +405,27 @@ public class RandomWalk {
 	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
 	        	int nID = n.getValue().getId();
 	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
-	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) { // each rw will start once with only the random node as root
+	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
 		        	if (countEntries == randomInit){ //random start
 		        		printName(n.getValue().getFullName(), nID+"");
-		        		rw(nID, count);
+		        		rw(nID, rwNumber);
 		        		//printVisitOrder(count);
 		        		//printFrequency(count, cont);
 		        		//printAnt(count);
 		        	}
-	        	} else { // each rw will start once with each node as root. So 100 rw will be: 100 * number of nodes
-	        		printName(n.getValue().getFullName(), nID+""); 
-	        		rw(nID, count);
-
 	        	}
-				this.calculated[nID] = 1;
+		        else {
+		        	printName(n.getValue().getFullName(), nID+"");
+	        		rw(nID, rwNumber);
+		        }
+				this.calculated[nID] += 1;
 				countEntries++;
 	        }
-	        count ++;
+	        rwNumber ++;
         }
-        printVisitOrder(count);
-		printFrequency(count, cont);
-		printAnt(count);
+        printVisitOrder(max);
+		printFrequency(max, cont);
+		printAnt(max);
         this.calculatedFull = true;
         // fecha o arquivo de ordem de visita
 		try {
@@ -474,7 +493,7 @@ public class RandomWalk {
 	        	
 	        	Node nd = v.getNode();
 	        	int hop = v.getHop();
-	        	int loop = v.getLoop();
+	        	int loop = v.getRwNumber();
 	        	int ndId = nd.getId();
 	        	String ndName = nd.getFullName();
 	        	NodeType ndType = nd.getNodeType();
@@ -511,6 +530,8 @@ public class RandomWalk {
         writer = null;
         try {
 			writer = new FileWriter(fileName);
+			writer.append("nodeNumber");
+			writer.append(",");
 			writer.append("node");
 			writer.append(",");
 			writer.append("visits\n");
@@ -522,6 +543,8 @@ public class RandomWalk {
 
 	        		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
 	        
+	        	writer.append(nIDiT+"");
+				writer.append(",");
 				writer.append(formatName(nIt.getValue().getFullName()));
 				writer.append(",");
 				writer.append(totalVisits+"\n");

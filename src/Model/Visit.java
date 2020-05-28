@@ -5,7 +5,7 @@ import Ontology.Node;
 public class Visit {
 	
 	private Node node;
-	private int loop; // rw loop where visit has made
+	private int rwNumber; // rw loop where visit has made
 	private int hop; // hop number when the node was visited
 	
 	public int getHop() {
@@ -20,11 +20,11 @@ public class Visit {
 	public void setNode(Node node) {
 		this.node = node;
 	}
-	public int getLoop() {
-		return loop;
+	public int getRwNumber() {
+		return rwNumber;
 	}
-	public void setLoop(int loop) {
-		this.loop = loop;
+	public void setRwNumber(int rwNumber) {
+		this.rwNumber = rwNumber;
 	}
 
 }
