@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import Model.Visit;
 
@@ -29,6 +32,7 @@ public class RandomWalk {
 	private ArrayList<LinkedList<Integer>> reachable;
 	private Boolean calculatedFull;
 	private ArrayList <Integer> overAllVisits; //summarizes visits
+	private ArrayList <String> overAllPaths; //aggregate paths (concatenate)
 	private HashMap<Node, Node> visited_ant = new HashMap<Node, Node>();
 	private FileWriter writer = null;
 	private ArrayList<Visit> visitList= new ArrayList();
@@ -42,7 +46,20 @@ public class RandomWalk {
     private String trace;
     private int forceStartNodeNummber;
     private String runAllNodesOnce;
+    private int top;
+    private HashMap<Integer,String>  nodesNames = new HashMap();
+    private HashSet<String> words = new HashSet();
+    private ArrayList<Integer> binaryFlag = new ArrayList();
+    
 	
+	public int getTop() {
+		return top;
+	}
+
+	public void setTop(int top) {
+		this.top = top;
+	}
+
 	public String getRunAllNodesOnce() {
 		return runAllNodesOnce;
 	}
@@ -135,6 +152,14 @@ public class RandomWalk {
 			this.reachable.add(temp);
 			this.calculated[i] = 0;
 		}
+		Set nodes = g.getVertices().entrySet();
+		Iterator i = nodes.iterator();
+		while (i.hasNext()) {
+			Map.Entry<Integer, Node> nMap = (Map.Entry<Integer, Node>) i.next();
+			String nodeName = nMap.getValue().getFullName();
+			int nodeId = nMap.getValue().getId();
+			nodesNames.put(nodeId, nodeName);
+		}
 	}
 	
 	/**
@@ -178,45 +203,58 @@ public class RandomWalk {
 		Queue<Integer> queue = new LinkedList<Integer>();
 	    queue.add(root);
 	    visited.set(root, 1);
-	    
+	   
+	    String path = "";
 	    ArrayList<LinkedList<Integer>> tempAdj = this.g.getAdj();
 	    HashMap<Integer, Node> grafo = g.getVertices();
 	    Node nodeRoot = grafo.get(root); 
 	    NodeType tipo = nodeRoot.getNodeType();
-    	String obs = "nada";
+    	String obs = "";
     	if (tipo == NodeType.Class) {
     		NodeClass noClasse = (NodeClass) nodeRoot;
     		obs = "classe "+noClasse.getDescClass();
+    		path = noClasse.getDescClass();
     	} 
     	if (tipo == NodeType.Property) {
     		NodeProperty noPropriedade = (NodeProperty) nodeRoot;
     		obs ="Propriedade "+noPropriedade.getDescProp();
+    		path = noPropriedade.getDescProp();
     	}
     	if (tipo == NodeType.RestrictionComplementOfClass) {
     		NodeRestrictionComplementOfClass noRestCompClass = (NodeRestrictionComplementOfClass) nodeRoot;
     		obs = "Rest classe complemento " + noRestCompClass.getDescClass();
+    		path = noRestCompClass.getDescClass();
     	}
     	if (tipo == NodeType.RestrictionComplementOfProperty) {
     		NodeRestrictionComplementOfProperty noRestCompProp = (NodeRestrictionComplementOfProperty) nodeRoot;
     		obs = "Rest propriedade complemento "+noRestCompProp.getDescProp();
+    		path = noRestCompProp.getDescProp();
     	}
     	if (tipo == NodeType.RestrictionCardinality) {
     		NodeRestrictionCardinality noRestCard = (NodeRestrictionCardinality) nodeRoot;
     		obs = "Rest Cardinalidade "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
+    		path = noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
     	}
     	if (tipo == NodeType.RestrictionComplementOfRestrictionCardinality) {
     		NodeRestrictionComplementOfRestrictionCardinality noRestCompCard = (NodeRestrictionComplementOfRestrictionCardinality) nodeRoot;
     		obs = "Rest Complemento Rest Cardinalidade "+ noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
+    		path = noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
     	}
 	    printName(nodeRoot.getFullName(), obs);
 	    visited_ant.put(nodeRoot, null); // dataset with dad child visit
+	    String tempPath = overAllPaths.get(root);
+	    words.add(path); // creates a new word in the dictionary of all words
+	    
+	    tempPath = tempPath + " " + path;
 	    int total = overAllVisits.get(root);
 	    total++;
 	    overAllVisits.set(root, total); //dataset with total number of visits per node
+	    overAllPaths.set(root, tempPath); //dataset with accumulate paths  of visits per node
 	    Visit vis = new Visit();
 	    vis.setRwNumber(rwNumber);
 	    vis.setNode(nodeRoot);
 	    vis.setHop(0);
+	    vis.setPath(path);
 	    visitList.add(vis); // dataset with the order of visit
 	    int countVisited = 0;
 	    //while(!queue.isEmpty())
@@ -287,41 +325,59 @@ public class RandomWalk {
                     	
                     	Node nodeVisited = grafo.get(child);
                     	tipo = nodeVisited.getNodeType();
-                    	obs = visits+"";
+                    	//obs = visits+"";
                     	printName(nodeVisited.getFullName(), obs);
-                    	
+                    	String nname = ""; 
                     	if (tipo == NodeType.Class) {
                     		NodeClass noClasse = (NodeClass) nodeVisited;
-                    		obs =  "classe "+noClasse.getDescClass();
+                    		obs +=  "classe "+noClasse.getDescClass();
+                    		path +=  " "+noClasse.getDescClass();
+                    		nname =  noClasse.getDescClass();
                     	} 
                     	if (tipo == NodeType.Property) {
                     		NodeProperty noPropriedade = (NodeProperty) nodeVisited;
-                    		obs = "Propriedade "+noPropriedade.getDescProp();
+                    		obs += "Propriedade "+noPropriedade.getDescProp();
+                    		path += "  "+noPropriedade.getDescProp();
+                    		nname = noPropriedade.getDescProp();
                     	}
                     	if (tipo == NodeType.RestrictionComplementOfClass) {
                     		NodeRestrictionComplementOfClass noRestCompClass = (NodeRestrictionComplementOfClass) nodeVisited;
-                    		obs = "Rest classe complemento " +noRestCompClass.getDescClass();
+                    		obs += "Rest classe complemento " +noRestCompClass.getDescClass();
+                    		path += " " +noRestCompClass.getDescClass();
+                    		nname = noRestCompClass.getDescClass();
                     	}
                     	if (tipo == NodeType.RestrictionComplementOfProperty) {
                     		NodeRestrictionComplementOfProperty noRestCompProp = (NodeRestrictionComplementOfProperty) nodeVisited;
-                    		obs = "Rest propriedade complemento "+noRestCompProp.getDescProp();
+                    		obs += "Rest propriedade complemento "+noRestCompProp.getDescProp();
+                    		path += " "+noRestCompProp.getDescProp();
+                    		nname = noRestCompProp.getDescProp();
                     	}
                     	if (tipo == NodeType.RestrictionCardinality) {
                     		NodeRestrictionCardinality noRestCard = (NodeRestrictionCardinality) nodeVisited;
-                    		obs = "Rest Cardinalidade "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
+                    		obs += "Rest Cardinalidade "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
+                    		path += "  "+noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
+                    		nname = noRestCard.getDescProp()+" "+noRestCard.getDescRangeOrDomain();
                     	}
                     	if (tipo == NodeType.RestrictionComplementOfRestrictionCardinality) {
                     		NodeRestrictionComplementOfRestrictionCardinality noRestCompCard = (NodeRestrictionComplementOfRestrictionCardinality) nodeVisited;
-                    		obs = "Rest Complemento Rest Cardinalidade "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
+                    		obs += "Rest Complemento Rest Cardinalidade "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
+                    		path += " "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
+                    		nname = noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
                     	}
+                    	
                     	visited_ant.put(nodeVisited, nodeRoot); // dataset with dad child visits 
                     	//if (visits < 2) // to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
                     		//printName(nodeVisited.getFullName(), obs);
+                    	tempPath = overAllPaths.get(child);
+                    	tempPath=tempPath + " " + path;
+                    	overAllPaths.set(child, tempPath); // dataset with total visits per node
+                    	words.add(nname); // creates a new word in the dictionary of all words
+                    	
                     	
                     	total = overAllVisits.get(child);
                 	    total++;
                 	    overAllVisits.set(child, total); // dataset with total visits per node
-                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total);
+                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total, path);
  
                        	countVisited++;
                         
@@ -329,6 +385,7 @@ public class RandomWalk {
                 	    vis.setRwNumber(rwNumber);
                 	    vis.setNode(nodeVisited);
                 	    vis.setHop(countVisited);
+                	    vis.setPath(path);
                 	    visitList.add(vis); // dataset with the order of visit
                 	    
                     	queue.add(child);
@@ -377,12 +434,12 @@ public class RandomWalk {
 	 * Calculates all the reachable nodes from all the nodes for the graph in memory
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void fullrw()
+	public HashMap fullrw()
 	{
 		Set cont = g.getVertices().entrySet();
 		int sumVertices = cont.size();
 	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
-
+	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
 	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
 	           
         int rwNumber = 0;
@@ -425,6 +482,8 @@ public class RandomWalk {
         }
         printVisitOrder(max);
 		printFrequency(max, cont);
+		binaryCSV();
+
 		printAnt(max);
         this.calculatedFull = true;
         // fecha o arquivo de ordem de visita
@@ -436,9 +495,14 @@ public class RandomWalk {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		
+		Collections.sort(overAllVisits);
+		ArrayList<Integer> top3 = new ArrayList<Integer>(overAllVisits.subList(overAllVisits.size() -3, overAllVisits.size()));
+		return visited_ant;
 
 		
-	    
+	    //return returnTop(max,cont,top);
  
         
         // print the visit chain root and child
@@ -476,6 +540,51 @@ public class RandomWalk {
         //}
 	}
 	
+	private void binaryCSV() {
+		Iterator i = words.iterator();
+		//Iterator j = overAllPaths.iterator();
+		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
+		writer = null;
+		try {
+			writer = new FileWriter(fileName);
+			String header = "nodeId,";
+			while(i.hasNext()) {
+				header+=i.next()+",";
+				
+			}
+			header+="\n";
+			writer.append(header);
+			String line = "";
+			
+			
+			for (int j = 0; j<overAllPaths.size();j++) {
+				//line = (String) j.j.next()+",";
+				line = j+",";
+				//while(j.hasNext()) {
+				i = words.iterator();
+				String find = (String) overAllPaths.get(j);
+				while(i.hasNext()) {
+					String tpath = (String) i.next();
+					//String find = (String) j.next();
+					if (find.length()>2)
+						find = find.trim(); 
+					if (find.indexOf(tpath)!=-1) {
+						line+="1,";
+					} else {
+						line+="0,";
+					}
+				}
+				writer.append(line+"\n");
+			}
+			writer.flush();
+			writer.close();
+			
+		}
+		 catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	private void printVisitOrder(int count) {
 		// print visit order
         Iterator it = (Iterator) visitList.iterator();
@@ -485,7 +594,7 @@ public class RandomWalk {
         writer = null;
         try {
 			writer = new FileWriter(fileName);
-			writer.append("nodeId,nodeName,nodeType,nodeLevel,loop,hop\n");
+			writer.append("nodeId,nodeName,nodeType,nodeLevel,loop,hop,path\n");
 			//writer.append(",");
 			//writer.append("visits\n");
 	        while (it.hasNext()) {
@@ -494,13 +603,14 @@ public class RandomWalk {
 	        	Node nd = v.getNode();
 	        	int hop = v.getHop();
 	        	int loop = v.getRwNumber();
+	        	String path = v.getPath();
 	        	int ndId = nd.getId();
 	        	String ndName = nd.getFullName();
 	        	NodeType ndType = nd.getNodeType();
 	        	String typeName = ndType.name();
 	        	int ndLevel = nd.getLevel();
 	        	if(this.getTrace().contentEquals("Y"))
-	        		System.out.println(" node: " + ndId + " nome " + formatName(ndName) + " type: "+ typeName + " level: "+ ndLevel + " loop: "+ loop + " hop: "+ hop);
+	        		System.out.println(" node: " + ndId + " nome " + formatName(ndName) + " type: "+ typeName + " level: "+ ndLevel + " loop: "+ loop + " hop: "+ hop + " path" + path);
 	        
 				writer.append(ndId+",");
 				
@@ -508,8 +618,8 @@ public class RandomWalk {
 				writer.append(typeName+",");
 				writer.append(ndLevel+",");
 				writer.append(loop+",");
-				//writer.append(hop+",");
-				writer.append(hop+"\n");
+				writer.append(hop+",");
+				writer.append(path+"\n");
         	
 	        }
         
@@ -525,6 +635,7 @@ public class RandomWalk {
 	private void printFrequency(int count, Set cont) {
 	       // print frequency
         Iterator it = (Iterator) cont.iterator();
+        
         //fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
         String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
         writer = null;
@@ -534,11 +645,17 @@ public class RandomWalk {
 			writer.append(",");
 			writer.append("node");
 			writer.append(",");
-			writer.append("visits\n");
+			writer.append("visits");
+			writer.append(",");
+			writer.append("paths");
+			writer.append(",");
+			writer.append("uniquepaths\n");
 	        while (it.hasNext()) {
 	        	Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
 	        	int nIDiT = nIt.getValue().getId();
 	        	int totalVisits = overAllVisits.get(nIDiT);
+	        	String totalPath = overAllPaths.get(nIDiT);
+	        	String cleanPath = cleanPath(totalPath);
 	        	if(this.getTrace().contentEquals("Y"))
 
 	        		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
@@ -547,7 +664,11 @@ public class RandomWalk {
 				writer.append(",");
 				writer.append(formatName(nIt.getValue().getFullName()));
 				writer.append(",");
-				writer.append(totalVisits+"\n");
+				writer.append(totalVisits+"");
+				writer.append(",");
+				writer.append(totalPath);
+				writer.append(",");
+				writer.append(cleanPath+"\n");
 	        	
 	        }
         
@@ -558,6 +679,26 @@ public class RandomWalk {
 			e.printStackTrace();
 		}
 	}
+	private String cleanPath(String totalPath) {
+		
+		Set <String> uniquePath = new HashSet();
+		String cleanPath = " "; 
+		
+		// TODO Auto-generated method stub
+		StringTokenizer st = new StringTokenizer(totalPath);
+	     while (st.hasMoreTokens()) {
+	         uniquePath.add(st.nextToken());
+	     }
+	     
+	     Iterator it = uniquePath.iterator();
+	     
+	     while (it.hasNext()) {
+	    	 cleanPath += " " + it.next();
+	     }
+		
+		return cleanPath;
+	}
+
 	private void printName(String nodeFullName, String obs) {
 		// TODO Auto-generated method stub
 		//if (n.getValue().getId()==290){
@@ -604,8 +745,8 @@ public class RandomWalk {
 			
 	}
 	
-	private void accumulateAnt(int root, String rootName, int child, String nodeName, int visits) {
-		printAnt = printAnt + root + ","+ formatName(rootName) + ","+ child + ","+ formatName(nodeName) + ","+ visits + "\n";
+	private void accumulateAnt(int root, String rootName, int child, String nodeName, int visits, String path) {
+		printAnt = printAnt + root + ","+ formatName(rootName) + ","+ child + ","+ formatName(nodeName) + ","+ visits + ","+ path+ "\n";
 	}
 	private void printAnt(int count) {
 		 String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_ant_"+name+".csv";
@@ -640,6 +781,27 @@ public class RandomWalk {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
+	}
+	
+	private HashMap returnTop(int count, Set cont, int top) {
+	    HashMap topItens = new HashMap();
+	    TreeSet ts = new TreeSet(cont);
+	    
+	    int c = 0;
+	    Iterator it =  ts.descendingIterator();	
+	    while (it.hasNext() && c<top ) {
+	    	Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
+	    	int nIDiT = nIt.getValue().getId();
+	    	int totalVisits = overAllVisits.get(nIDiT);
+	    	if(this.getTrace().contentEquals("Y"))
+	
+	    		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
+	    	topItens.put(nIDiT, totalVisits);
+	    	c++;
+	    	
+	    }
+     
+	    return topItens;
 	}
 
 	/**

@@ -26,12 +26,10 @@ import javax.swing.text.DefaultCaret;
 import Application.OSType;
 import Model.OntologyManagerTab;
 import Model.OntologyManagerTab.MinimizeGraph;
-import Model.OntologyManagerTab.OpenO1;
-import Model.OntologyManagerTab.OpenO2;
+
 import Model.OntologyManagerTab.RunOnt;
-import Model.OntologyManagerTab.SaveR;
-import Model.OntologyManagerTab.ShowHideIRI1;
-import Model.OntologyManagerTab.ShowHideIRI2;
+//import Model.OntologyManagerTab.SaveR;
+
 import Model.OntologyManagerTab.ShowHideIRIResults;
 import Ontology.Graph;
 import Ontology.RandomWalk;
@@ -100,8 +98,9 @@ public class Control {
     private String trace; // Y show prints
     private int forceStartNodeNummber; // number indicating the node to start always at each rw. if number > size of vertices use the ramdom 
     private String runMode; // C = class, P = properties, B = Both
+    private int topItens; // number of top visited to return 
      
-    
+    private HashMap top;
 	/**
 	 *  function that run in batch loading ontologies from args
 	 * 
@@ -136,9 +135,9 @@ public class Control {
 		omt.openBatch1(path, args[4]);
 		agOnt1 = omt.getAgOnt1();
 		
-		pathcsv= args[5];
-		breakIfBackToNode = args[6];
-	    randomizeFirstNodeEachRW = args[7];
+		pathcsv= args[5]; // where the csv are stored
+		breakIfBackToNode = args[6]; // 
+	    randomizeFirstNodeEachRW = args[7]; // set a random 
 	    restartSameRWIfLoop = args[8];
 	    trace = args[9];
 	    forceStartNodeNummber = Integer.parseInt(args[10]);
@@ -155,12 +154,13 @@ public class Control {
 			rw0.setRestartSameRWIfLoop(restartSameRWIfLoop);
 			rw0.setTrace(trace);
 			rw0.setForceStartNodeNummber(forceStartNodeNummber);
+			rw0.setTop(topItens);
 			
 			//Random randRoot = new Random();
 			//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
 			//System.out.println("calling RandomWalk with root:"+ root + " selecting "+ gOnt1.getNumVertices());
 			//rw1.rw(root);
-			rw0.fullrw();
+			top = rw0.fullrw();
 			
 			System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
 			RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
@@ -171,8 +171,9 @@ public class Control {
 			rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
 			rw1.setTrace(trace);
 			rw1.setForceStartNodeNummber(forceStartNodeNummber);
+			rw1.setTop(topItens);
 	
-			rw1.fullrw();
+			top =  rw1.fullrw();
 			
 		}	else { 
 				if (runMode.equals("C")) {	
@@ -185,25 +186,44 @@ public class Control {
 					rw0.setRestartSameRWIfLoop(restartSameRWIfLoop);
 					rw0.setTrace(trace);
 					rw0.setForceStartNodeNummber(forceStartNodeNummber);
+					rw0.setTop(topItens);
 					
 					//Random randRoot = new Random();
 					//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
 					//System.out.println("calling RandomWalk with root:"+ root + " selecting "+ gOnt1.getNumVertices());
 					//rw1.rw(root);
-					rw0.fullrw();
+					top =  rw0.fullrw();
 			
-				} else {
-					System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
-					RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
+				} else { 
+					if (runMode.equals("C")) {
+						System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
+						RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
+						
+						rw1.setSetBreakIfBackToNode(breakIfBackToNode);
+						rw1.setPathcsv(pathcsv);
+						rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
+						rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
+						rw1.setTrace(trace);
+						rw1.setForceStartNodeNummber(forceStartNodeNummber);
+						rw1.setTop(topItens);
+				
+						top = rw1.fullrw();
+					} else { 
+						if (runMode.equals("T")) {
+							System.out.println("Running Random Walk n "+max+" times (max) in Class and Properties:"+args[4] );
+							RandomWalk rw1 = new RandomWalk(gOnt1, args[4]+"_prop_"+max, max);
+							
+							rw1.setSetBreakIfBackToNode(breakIfBackToNode);
+							rw1.setPathcsv(pathcsv);
+							rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
+							rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
+							rw1.setTrace(trace);
+							rw1.setForceStartNodeNummber(forceStartNodeNummber);
+							rw1.setTop(topItens);
 					
-					rw1.setSetBreakIfBackToNode(breakIfBackToNode);
-					rw1.setPathcsv(pathcsv);
-					rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-					rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
-					rw1.setTrace(trace);
-					rw1.setForceStartNodeNummber(forceStartNodeNummber);
-			
-					rw1.fullrw();
+							top = rw1.fullrw();
+						}
+					}
 
 				}
 			

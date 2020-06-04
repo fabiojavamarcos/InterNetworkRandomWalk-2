@@ -74,33 +74,13 @@ import Ontology.UsefulOWL;
 
 @SuppressWarnings({ "serial", "unused" })
 public class OntologyManagerTab extends JFrame {
-	private JButton btnLoadOnt1 = new JButton("Load Ontology 1");
-	private JButton btnShowHideIRI1 = new JButton("Show/Hide Ontology 1 IRIs");
-	private JButton btnLoadOnt2 = new JButton("Load Ontology 2");
-	private JButton btnShowHideIRI2 = new JButton("Show/Hide Ontology 2 IRIs");
-	private JButton btnRun = new JButton("Run");
-	private JButton btnSave = new JButton("Save Results");
-	private JButton btnShowHideIRIResults = new JButton("Show/Hide Results IRIs");
-	private JButton btnCleanUp = new JButton("Minimize Graph");
-    private JTextArea Log;
-    private DefaultCaret LogCaret;
-    private JScrollPane jScrollPaneLog;
-    private JLabel warninglbl = new JLabel();
-	private JLabel lbl1 = new JLabel();
-	private JLabel lbl2 = new JLabel();
-	private JComboBox jComboBoxOperation;
+
 	boolean ProjOp = false;
 	boolean HideIRI1 = false;
 	boolean HideIRI2 = false;
 	boolean HideIRIResults = false;
 	boolean CleanUp = false;
-	private JTable jTable1; 			//Ontology1 Table
-    private JScrollPane jScrollPane1;
-    private JTable jTable2; 			//Ontology2 Table
-    private JScrollPane jScrollPane2;
-    private JTable jTableInc; 			//Inclusion Constraints Table
-    private JScrollPane jScrollPaneInc;
-    private JScrollPane jScrollPaneMain;
+	private String log = "";
     private Component root;
     private String pathOnt1; 			//Ontology1 Path
     private String nameOnt1; 			//Ontology1 Name
@@ -114,6 +94,7 @@ public class OntologyManagerTab extends JFrame {
             */
     private Graph gOnt1; 				//Graph for Ontology 1
     private Graph [] agOnt1; 				//Array Graph for Ontology 1
+    private ArrayList <ProjectionItem> model2 = new ArrayList(); // array list to atore projection list of nodes
     public boolean isHideIRI1() {
 		return HideIRI1;
 	}
@@ -311,122 +292,9 @@ public class OntologyManagerTab extends JFrame {
 		gOnt1 = null;
 		gOnt2 = null;
 		gResults = null;
-		this.setLayout(null);
-		lbl2.setBounds(640, 420, 60, 20);
-		lbl2.setText("Log: ");
-		this.add(lbl2);
-		Log = new JTextArea();
-		jScrollPaneLog = new JScrollPane();
-		Log.setColumns(20);
-		Log.setRows(10);
-		Log.setBackground(Color.WHITE);
-		Log.setEditable(false);
-		LogCaret = (DefaultCaret)Log.getCaret();
-		LogCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		jScrollPaneLog.setViewportView(Log);
-		jScrollPaneLog.setBounds(640, 440, 620, 215);
-		this.add(jScrollPaneLog);
-		lbl1.setBounds(10, 6, 100, 20);
-		lbl1.setText("Operation: ");
-		this.add(lbl1);
-		warninglbl.setForeground(Color.red);
-		warninglbl.setBounds(8, 375, 1500, 20);
-		warninglbl.setFont(new Font("Lucida Grande", Font.BOLD, 10));
-		warninglbl.setText("");
-		warninglbl.setVisible(false);
-		this.add(warninglbl);		
-		//setting up table forOntology 1
-		jTable1 = new JTable();
-		jScrollPane1 = new JScrollPane();
-		DefaultTableModel model1 = new DefaultTableModel(
-	               new Object [][] {
 
-	               },
-	               new String [] {
-	                   "Ontology 1", ""
-	               });				
-		jTable1.setModel(model1);     
-		jScrollPane1.setBounds(6, 40, 620, 320);
-        jScrollPane1.setViewportView(jTable1);
-        this.add(jScrollPane1);      
-        btnLoadOnt1.setBounds(6, 365, 305, 29);
-		this.add(btnLoadOnt1);
-		btnLoadOnt1.addActionListener(new OpenO1());
-		btnShowHideIRI1.setBounds(321, 365, 305, 29);
-		this.add(btnShowHideIRI1);
-		btnShowHideIRI1.addActionListener(new ShowHideIRI1());
 		HideIRI1=false;
-		btnShowHideIRI1.setEnabled(false);
-		//setting up table forOntology 2
-        jTable2 = new JTable();
-		jScrollPane2 = new JScrollPane();
-		DefaultTableModel model2 = new DefaultTableModel(
-	               new Object [][] {
 
-	               },
-	               new String [] {
-	                   "Ontology 2", ""
-	               });				
-		jTable2.setModel(model2);
-        jScrollPane2.setBounds(640, 40, 620, 320);
-        jScrollPane2.setViewportView(jTable2);        
-        this.add(jScrollPane2);
-		btnLoadOnt2.setBounds(640, 365, 305, 29);		
-		this.add(btnLoadOnt2);
-		btnLoadOnt2.addActionListener(new OpenO2());
-		btnShowHideIRI2.setBounds(955, 365, 305, 29);
-		this.add(btnShowHideIRI2);
-		btnShowHideIRI2.addActionListener(new ShowHideIRI2());
-		HideIRI2=false;
-		btnShowHideIRI2.setEnabled(false);
-		//setting up table forResults, Inclusion Constraints
-		jTableInc = new JTable();
-		jScrollPaneInc = new JScrollPane();
-		jTableInc.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Resulting ontology", ""
-            }
-        ));
-		jTableInc.setEnabled(false);
-		jScrollPaneInc.setBounds(6, 420, 620, 200);
-        jScrollPaneInc.setViewportView(jTableInc);
-        this.add(jScrollPaneInc);
-        btnSave.setBounds(420, 625, 202, 29);
-		this.add(btnSave);
-		btnSave.addActionListener(new SaveR());
-		btnSave.setEnabled(false);
-		btnShowHideIRIResults.setBounds(213, 625, 202, 29);
-		this.add(btnShowHideIRIResults);
-		btnShowHideIRIResults.addActionListener(new ShowHideIRIResults());
-		btnShowHideIRIResults.setEnabled(false);
-		HideIRIResults = false;
-		btnCleanUp.setBounds(6, 625, 202, 29);
-		this.add(btnCleanUp);
-		btnCleanUp.addActionListener(new MinimizeGraph());
-		btnCleanUp.setEnabled(false);
-		CleanUp = false;
-        //ComboBox for operation selection
-        jComboBoxOperation = new JComboBox();
-		jComboBoxOperation.setBounds(80, 6, 100, 20);
-		jComboBoxOperation.setModel(new javax.swing.DefaultComboBoxModel(
-				new String[] { "Union", "Intersection", "Projection", "Difference"}));
-		jComboBoxOperation.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-            	jComboBoxOperationActionPerformed(evt);
-            }
-        });
-		jComboBoxOperation.setSelectedIndex(0);
-		this.add(jComboBoxOperation);
-		btnRun.setBounds(190, 6, 117, 22);
-		this.add(btnRun);
-		btnRun.addActionListener(new RunOnt());
-		ShowBottomWarning = true;
-		//Welcome Message
-		Log.setText("Welcome to the Ontology Manager Tab! \nDeveloped by Romulo de Carvalho Magalhaes \n");
-		this.pack();
 		this.setVisible(true);
 	}
 	
@@ -449,79 +317,7 @@ public class OntologyManagerTab extends JFrame {
         }
 	}
 
-	/**
-	 * Manages GUI correctly for each operation selected
-	 * 
-	 * @param evt
-	 */
-	private void jComboBoxOperationActionPerformed(java.awt.event.ActionEvent evt)
-	{
-		try{
-			String str = (String)(jComboBoxOperation.getSelectedItem());
-			if(str.equals("Projection"))
-			{
-				if(!ProjOp)
-				{
-			        //btnLoadOnt1.setBounds(6, 365, 300, 29);
-					btnLoadOnt1.setText("Load Ontology Projection");
-					btnLoadOnt2.setVisible(false);
-					btnShowHideIRI2.setVisible(false);
-					ProjOp = true;
-					Ont2 = null;
-					gOnt2 = null;
-					//populate projection table in Ontology 2 model
-					if(gOnt1 != null)
-					{
-						ProjectionTableModel model2 = new ProjectionTableModel();
-	    				jTable2.setModel(model2);
-	    				fillProjectionList(gOnt1,model2);
-						
-					}else
-					{
-						//clear table 2
-						DefaultTableModel model2 = new DefaultTableModel(
-				                new Object [][] {
 	
-				                },
-				                new String [] {
-				                    "Vocabulary", "Choice"
-				                }
-				            );
-						jTable2.setModel(model2);
-					}
-					
-				}
-			}
-			else 
-			{
-				if(ProjOp)
-				{
-					//btnLoadOnt1.setBounds(6, 345, 117, 29);
-					btnLoadOnt1.setText("Load Ontology 1");
-					btnLoadOnt2.setVisible(true);
-					btnShowHideIRI2.setVisible(true);
-					btnShowHideIRI2.setEnabled(false);
-					//clear table 2
-					DefaultTableModel model2 = new DefaultTableModel(
-				               new Object [][] {
-				            		   
-				               },
-				               new String [] {
-				                   "Ontology 2", ""
-				               });				
-			        jTable2.setModel(model2);
-					ProjOp = false;
-					Ont2 = null;
-					gOnt2 = null;
-				}
-			}
-		}catch(Exception ex)
-		{
-			String str = Log.getText() + "\n" + ex.getMessage();
-			Log.setText(str);
-			return;
-		}
-	}
 	
 	/**
 	 * Given a node n returns its label according to its type with IRI
@@ -684,405 +480,10 @@ public class OntologyManagerTab extends JFrame {
 		return null;
 	}
 	
-	/**
-	 * Fill DefaultTableModel model with the correspondent Ontology Graph gOnt with IRIs
-	 * 
-	 * @param gOnt
-	 * @param model
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public DefaultTableModel fillJTableWithIRI(Graph gOnt, DefaultTableModel model)
-	{
-		String str = Log.getText();
-		Map<Integer, Node> verticesOntOrdenado = gOnt.getVertices();
-		Object[] a = verticesOntOrdenado.entrySet().toArray();
-		Arrays.sort(a, new Comparator(){
-            public int compare(Object o1, Object o2)
-            {
-            	Node n1 = (Node)((Map.Entry) (o1)).getValue();
-                Node n2 = (Node)((Map.Entry) (o2)).getValue();
-                String s1 = getComparatorString(n1);
-                String s2 = getComparatorString(n2);
-                return ((Comparable) s1).compareTo(s2);
-            }
-		});
-		
-        String oExp = "";
-        String dExp = "";
-        Set cont = verticesOntOrdenado.entrySet();
-        Iterator i = (Iterator) cont.iterator();
-        int bottomCount = 0;
-        while(i.hasNext()) 
-        {
-        	Map.Entry<Integer, Node> temp = (Map.Entry<Integer, Node>) i.next();
-        	Node n = temp.getValue();
-        	if(!n.isRemove())
-        	{
-	        	if(!CleanUp)
-	        	{
-		        	if(n.isNodeBottom())
-		        	{
-		        		oExp = getNodeLabelWithIRI(n);
-		        		model.addRow(new String [] {oExp, "      _|_ - node, Level "+n.getLevel()});
-		        		bottomCount++;
-		        	}	
-		            LinkedList<Integer> l = gOnt.getList(n.getId());
-		            Node nodeOrigin;
-		            HashMap<Integer,Node> vertices = gOnt.getVertices();
-		            if((l!= null)&&(!l.isEmpty()))
-		            {
-		            	nodeOrigin = vertices.get(l.get(0));
-		        	    oExp = getNodeLabelWithIRI(nodeOrigin);
-		        	    if((l.size() == 1))
-		        	    {
-		        	    	model.addRow(new String [] {oExp, "            "});
-		    		    }
-		        	    if((l.size() > 0))
-		        	    {
-		        	    	for(int k = 1; k < l.size(); k++)
-		        		    {
-		        			    Node nodeDestiny =  vertices.get(l.get(k));
-		                        dExp = getNodeLabelWithIRI(nodeDestiny);
-		                        model.addRow(new String [] {oExp, dExp});
-		                    }
-		    		    }
-		    	    }
-	        	}
-	        	else
-	        	{
-	        		if(n.isNodeBottom())
-		        	{
-		        		oExp = getNodeLabelWithIRI(n);
-		        		model.addRow(new String [] {oExp, "      _|_ - node, Level "+n.getLevel()});
-		        		bottomCount++;
-		        	}
-	        		else
-	        		{
-			            LinkedList<Integer> l = gOnt.getList(n.getId());
-			            Node nodeOrigin;
-			            HashMap<Integer,Node> vertices = gOnt.getVertices();
-			            if((l!= null)&&(!l.isEmpty()))
-			            {
-			            	nodeOrigin = vertices.get(l.get(0));
-			        	    oExp = getNodeLabelWithIRI(nodeOrigin);
-			        	    if((l.size() == 1))
-			        	    {
-			        	    	model.addRow(new String [] {oExp, "            "});
-			    		    }
-			        	    if((l.size() > 0))
-			        	    {
-			        	    	for(int k = 1; k < l.size(); k++)
-			        		    {
-			        			    Node nodeDestiny =  vertices.get(l.get(k));
-			                        dExp = getNodeLabelWithIRI(nodeDestiny);
-			                        model.addRow(new String [] {oExp, dExp});
-			                    }
-			    		    }
-			    	    }
-	        		}
-	        	}
-        	}
-        }
-        if((bottomCount > 0)&&(ShowBottomWarning))
-        {
-        	str = str +"\nWarning: " + bottomCount +" bottom nodes found!";
-        	Log.setText(str);
-        	ShowBottomWarning = false;
-        }
-        return model;
-	}
+
 	
-	/**
-	 * Fill DefaultTableModel model with the correspondent Ontology Graph gOnt without IRIs
-	 * 
-	 * @param gOnt
-	 * @param model
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public DefaultTableModel fillJTableWithoutIRI(Graph gOnt, DefaultTableModel model)
-	{
-		String str = Log.getText();
-		Map<Integer, Node> verticesOntOrdenado = gOnt.getVertices();
-		Object[] a = verticesOntOrdenado.entrySet().toArray();
-		Arrays.sort(a, new Comparator(){
-            public int compare(Object o1, Object o2)
-            {
-            	Node n1 = (Node)((Map.Entry) (o1)).getValue();
-                Node n2 = (Node)((Map.Entry) (o2)).getValue();
-                String s1 = getComparatorString(n1);
-                String s2 = getComparatorString(n2);
-                return ((Comparable) s1).compareTo(s2);
-            }
-		});
-		
-        String oExp = "";
-        String dExp = "";
-        Set cont = verticesOntOrdenado.entrySet();
-        Iterator i = (Iterator) cont.iterator();
-        int bottomCount = 0;
-
-        while(i.hasNext()) 
-        {
-        	Map.Entry<Integer, Node> temp = (Map.Entry<Integer, Node>) i.next();
-        	Node n = temp.getValue();
-        	if(!n.isRemove())
-        	{
-	        	if(!CleanUp)
-	        	{
-		        	if(n.isNodeBottom())
-		        	{
-		        		oExp = getNodeLabelWithoutIRI(n);
-		        		model.addRow(new String [] {oExp, "      _|_ - node, Level "+n.getLevel()});
-		        		bottomCount++;
-		        	}
-		            LinkedList<Integer> l = gOnt.getList(n.getId());
-		            Node nodeOrigin;
-		            HashMap<Integer,Node> vertices = gOnt.getVertices();
-		            if((l!= null)&&(!l.isEmpty()))
-		            {
-		            	nodeOrigin = vertices.get(l.get(0));
-		        	    oExp = getNodeLabelWithoutIRI(nodeOrigin);
-		        	    if((l.size() == 1))
-		        	    {
-		        	    	model.addRow(new String [] {oExp, "            "});
-		    		    }
-		        	    if((l.size() > 0))
-		        	    {
-		        	    	for(int k = 1; k < l.size(); k++)
-		        		    {
-		        			    Node nodeDestiny =  vertices.get(l.get(k));
-		                        dExp = getNodeLabelWithoutIRI(nodeDestiny);
-		                        model.addRow(new String [] {oExp, dExp});
-		                    }
-		    		    }
-		    	    }
-	        	}
-	        	else
-	        	{
-	        		if(n.isNodeBottom())
-		        	{
-		        		oExp = getNodeLabelWithoutIRI(n);
-		        		model.addRow(new String [] {oExp, "      _|_ - node, Level "+n.getLevel()});
-		        		bottomCount++;
-		        	}
-	        		else
-	        		{
-			            LinkedList<Integer> l = gOnt.getList(n.getId());
-			            Node nodeOrigin;
-			            HashMap<Integer,Node> vertices = gOnt.getVertices();
-			            if((l!= null)&&(!l.isEmpty()))
-			            {
-			            	nodeOrigin = vertices.get(l.get(0));
-			        	    oExp = getNodeLabelWithoutIRI(nodeOrigin);
-			        	    if((l.size() == 1))
-			        	    {
-			        	    	model.addRow(new String [] {oExp, "            "});
-			    		    }
-			        	    if((l.size() > 0))
-			        	    {
-			        	    	for(int k = 1; k < l.size(); k++)
-			        		    {
-			        			    Node nodeDestiny =  vertices.get(l.get(k));
-			                        dExp = getNodeLabelWithoutIRI(nodeDestiny);
-			                        model.addRow(new String [] {oExp, dExp});
-			                    }
-			    		    }
-			    	    }
-	        		}
-	        	}
-        	}
-        }
-        /*
-        if(bottomCount > 0)
-        {
-        	str = str +"\nWarning: " + bottomCount +" bottom nodes found!";
-        	Log.setText(str);
-        }
-        */
-        return model;
-	}
 	
-	/**
-	 * Blocks or enable tab buttons
-	 * 
-	 * @param b
-	 */
-	public void enableButtons(Boolean b)
-	{
-		jComboBoxOperation.setEnabled(b);
-		btnRun.setEnabled(b);
-		btnLoadOnt1.setEnabled(b);
-		btnLoadOnt2.setEnabled(b);
-		
-		if((this.gOnt1 != null)&&(this.gOnt1.getNumVertices() > 0))
-		{
-			btnShowHideIRI1.setEnabled(b);
-		}
-		else
-		{
-			btnShowHideIRI1.setEnabled(false);
-		}
-		
-		if((this.gOnt2 != null)&&(this.gOnt2.getNumVertices() > 0))
-		{
-			btnShowHideIRI2.setEnabled(b);
-		}
-		else
-		{
-			btnShowHideIRI2.setEnabled(false);
-		}
-		
-		if((this.gResults != null)&&(this.gResults.getNumVertices() > 0))
-		{
-			btnSave.setEnabled(b);
-			btnShowHideIRIResults.setEnabled(b);
-			btnCleanUp.setEnabled(b);
-		}
-		else
-		{
-			btnShowHideIRIResults.setEnabled(false);
-			btnCleanUp.setEnabled(false);
-		}
-	}
 	
-	/**
-	 * Implements Show and Hide action for the Elements IRI in Ontology 1 
-	 *
-	 * @author Rômulo de Carvalho Magalhães
-	 *
-	 */
-	public class ShowHideIRI1 implements ActionListener {
-		public void actionPerformed(ActionEvent e) 
-	    {
-			if(gOnt1 != null)
-			{
-				root = SwingUtilities.getRoot((JButton) e.getSource());
-				String str = Log.getText();
-				try{
-					enableButtons(false);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    			if(HideIRI1)
-	    			{
-	    				HideIRI1 = false;
-	    				//Cleaning table
-		    			DefaultTableModel model1 = new DefaultTableModel(
-		    					new Object [][] {
-
-		    					},
-		    					new String [] {
-		    							nameOnt1, ""
-		    					});
-		    			
-		    			jTable1.setModel(model1);
-		    			//fill table with ontology
-		    			model1 = fillJTableWithIRI(gOnt1, model1);
-	    			}
-	    			else
-	    			{
-	    				HideIRI1 = true;
-	    				//Cleaning table
-		    			DefaultTableModel model1 = new DefaultTableModel(
-		    					new Object [][] {
-
-		    					},
-		    					new String [] {
-		    							nameOnt1, ""
-		    					});
-		    			
-		    			jTable1.setModel(model1);
-		    			//fill table with ontology
-		    			model1 = fillJTableWithoutIRI(gOnt1, model1);
-	    			}
-	    			str = (String)(jComboBoxOperation.getSelectedItem());
-	    			if(str.equals("Projection"))
-	    			{
-	    				ProjectionTableModel model2 = new ProjectionTableModel();
-	    				jTable2.setModel(model2);
-	    				fillProjectionList(gOnt1, model2);	    				
-	    			}
-	    			//str = str + "\n" + "message...";
-	    			//Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				}
-				catch(Exception ex)
-				{
-					str = Log.getText() + "\nError : " + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    			return;
-				}
-			}
-	    }
-	}
-	
-	/**
-	 * Implements Show and Hide action for the Elements IRI in Ontology 2 
-	 *
-	 * @author Rômulo de Carvalho Magalhães
-	 *
-	 */
-	public class ShowHideIRI2 implements ActionListener {
-		public void actionPerformed(ActionEvent e) 
-	    {
-			if(gOnt2 != null)
-			{
-				root = SwingUtilities.getRoot((JButton) e.getSource());
-				String str = Log.getText();
-				try{
-					enableButtons(false);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    			if(HideIRI2)
-	    			{
-	    				HideIRI2 = false;
-	    				//Cleaning table
-		    			DefaultTableModel model2 = new DefaultTableModel(
-		    					new Object [][] {
-
-		    					},
-		    					new String [] {
-		    							nameOnt2, ""
-		    					});
-		    			
-		    			jTable2.setModel(model2);
-		    			//fill table with ontology
-		    			model2 = fillJTableWithIRI(gOnt2, model2);
-	    			}
-	    			else
-	    			{
-	    				HideIRI2 = true;
-	    				//Cleaning table
-		    			DefaultTableModel model2 = new DefaultTableModel(
-		    					new Object [][] {
-
-		    					},
-		    					new String [] {
-		    							nameOnt2, ""
-		    					});
-		    			
-		    			jTable2.setModel(model2);
-		    			//fill table with ontology
-		    			model2 = fillJTableWithoutIRI(gOnt2, model2);
-	    			}
-	    			//str = str + "\n" + "message...";
-	    			//Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				}
-				catch(Exception ex)
-				{
-					str = Log.getText() + "\nError : " + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    			return;
-				}
-			}
-	    }
-	}
 	
 	/**
 	 * Implements Show and Hide action for the Elements IRI in Ontology 2 
@@ -1096,16 +497,16 @@ public class OntologyManagerTab extends JFrame {
 			if(gResults != null)
 			{
 				root = SwingUtilities.getRoot((JButton) e.getSource());
-				String str = Log.getText();
+				String str = log;
 				try{
-					enableButtons(false);
+					 
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	    			CleanUp = true;
 	    			
 	    			Thread worker = new Thread() {
 	    				@SuppressWarnings({ "rawtypes", "unchecked" })
 						public void run() {
-	    					String str = Log.getText() + "\nMinimizing Resulting Graph";
+	    					String str = log + "\nMinimizing Resulting Graph";
 	    					try{
 	    						//Evaluate cardinality restrictions according to the Procedure realized
 	    						HashMap<Integer,Node> vertices = gResults.getVertices();
@@ -1141,7 +542,7 @@ public class OntologyManagerTab extends JFrame {
 		    				    					{
 		    				    						NodeRestrictionCardinality nrc;  
 	    				    						    NodeRestrictionCardinality nrc2; 
-	    				    						    String tempstr = (String)(jComboBoxOperation.getSelectedItem());
+	    				    						    // 
 	    				    			    			if(str.equals("Intersection"))
 	    				    			    			{
 	    				    			    				if(((NodeRestrictionCardinality)n).getCard() > ((NodeRestrictionCardinality)n2).getCard())
@@ -1227,7 +628,7 @@ public class OntologyManagerTab extends JFrame {
 		    				    					{
 		    				    						NodeRestrictionComplementOfRestrictionCardinality nrc;
 		    				    						NodeRestrictionComplementOfRestrictionCardinality nrc2;
-		    				    						String tempstr = (String)(jComboBoxOperation.getSelectedItem());
+		    				    						
 	    				    			    			if(str.equals("Intersection"))
 	    				    			    			{
 	    				    			    				if(((NodeRestrictionCardinality)n).getCard() < ((NodeRestrictionCardinality)n2).getCard())
@@ -1373,9 +774,9 @@ public class OntologyManagerTab extends JFrame {
 	    		    			               new String [] {
 	    		    			                   "Resulting Ontology", ""
 	    		    			               });				
-	    		    				jTableInc.setModel(modelInc);
+	    		    				
 	    			    			//fill table with ontology
-	    		    				modelInc = fillJTableWithIRI(gResults, modelInc);
+	    		    				
 	    		    			}
 	    		    			else
 	    		    			{
@@ -1387,19 +788,19 @@ public class OntologyManagerTab extends JFrame {
 	    		    			               new String [] {
 	    		    			                   "Resulting Ontology", ""
 	    		    			               });				
-	    		    				jTableInc.setModel(modelInc);
+	    		    				
 	    			    			//fill table with ontology
-	    		    				modelInc = fillJTableWithoutIRI(gResults, modelInc);
+	    		    				
 	    		    			}
-	    		    			enableButtons(true);
+	    		    			
 	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    		    			str = str + "\nMinimization Done!";
-	    		    			Log.setText(str);
+	    		    			log = log + " "+ str;
 	    					}catch(Exception ex)
 	    					{
-	    						str = Log.getText() + "\n" + ex.getMessage();
-	    		    			Log.setText(str);
-	    		    			enableButtons(true);
+	    						str = log + "\n" + ex.getMessage();
+	    		    			log = log + " "+ str;
+	    		    			
 	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    		    			return;
 	    					}
@@ -1409,9 +810,9 @@ public class OntologyManagerTab extends JFrame {
 				}
 				catch(Exception ex)
 				{
-					str = Log.getText() + "\nError : " + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
+					str = log + "\nError : " + ex.getMessage();
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -1431,9 +832,9 @@ public class OntologyManagerTab extends JFrame {
 			if(gResults != null)
 			{
 				root = SwingUtilities.getRoot((JButton) e.getSource());
-				String str = Log.getText();
+				String str = log;
 				try{
-					enableButtons(false);
+					 
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	    			if(HideIRIResults)
 	    			{
@@ -1446,9 +847,9 @@ public class OntologyManagerTab extends JFrame {
 	    			               new String [] {
 	    			                   "Resulting Ontology", ""
 	    			               });				
-	    				jTableInc.setModel(modelInc);
+	    				
 		    			//fill table with ontology
-	    				modelInc = fillJTableWithIRI(gResults, modelInc);
+	    				
 	    			}
 	    			else
 	    			{
@@ -1461,20 +862,20 @@ public class OntologyManagerTab extends JFrame {
 	    			               new String [] {
 	    			                   "Resulting Ontology", ""
 	    			               });				
-	    				jTableInc.setModel(modelInc);
+	    				
 		    			//fill table with ontology
-	    				modelInc = fillJTableWithoutIRI(gResults, modelInc);
+	    				
 	    			}
 	    			//str = str + "\n" + "message...";
-	    			//Log.setText(str);
-	    			enableButtons(true);
+	    			//log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 				catch(Exception ex)
 				{
-					str = Log.getText() + "\nError : " + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
+					str = log + "\nError : " + ex.getMessage();
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -1482,303 +883,7 @@ public class OntologyManagerTab extends JFrame {
 	    }
 	}
 	
-	/**
-	 * Implements file browser to get Ontology1 and load it in gOnt1 object
-	 * 
-	 * @author Romulo de Carvalho Magalhaes
-	 *
-	 */
-	public class OpenO1 implements ActionListener {
-	    public void actionPerformed(ActionEvent e) 
-	    {
-	    	root = SwingUtilities.getRoot((JButton) e.getSource());
-	    	JFileChooser c = new JFileChooser();
-	    	String str;
-	    	//Show "Open" dialog:
-	    	int rVal = c.showOpenDialog(OntologyManagerTab.this);
-	    	if(rVal == JFileChooser.APPROVE_OPTION)
-	    	{
-	    		try{
-	    			enableButtons(false);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    			pathOnt1 = c.getSelectedFile().toString();
-	    			nameOnt1 = c.getSelectedFile().getName().toString();
-	    			str = Log.getText() + "\nLoading: " + pathOnt1;
-	    			Log.setText(str);
-	    			root.update(root.getGraphics());
-	    			
-	    			Thread worker = new Thread() {
-	    				public void run() {
-	    					String str;
-	    					try{
-	    						str = Log.getText();
-		    					Normalization norm = new Normalization();
-		    					Object[] o = norm.runOntologyNormalization(pathOnt1, nameOnt1, osType);
-		    	    			String pathNorm = o[0].toString();
-		    	    			//exception inside normalization...
-				    			if(pathNorm.substring(0, 5).equals("Error"))
-				    			{
-				    				str = str + "\n" + pathNorm;
-				    				Log.setText(str);
-				    				enableButtons(true);
-		    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				    				return;
-				    			}
-				    			IRIOnt1 = o[1].toString();
-				    			System.out.print("\n Original IRI Ontology 1: " + IRIOnt1 + "\n");
-				    			Ont1 = loadOnt(pathNorm);
-				    			ConstraintGraph r = new ConstraintGraph();
-				    			gOnt1 = new Graph();
-				    			gOnt1 = r.createGraph(Ont1, Log);
-				    			//Ontology loaded into memory, cleaning table 1
-				    			DefaultTableModel model1 = new DefaultTableModel(
-				    					new Object [][] {
-
-				    					},
-				    					new String [] {
-				    							nameOnt1, ""
-				    					});
-				    			
-				    			jTable1.setModel(model1);
-				    			//fill table with ontology
-				    			ShowBottomWarning = true;
-				    			CleanUp = false;
-				    			model1 = fillJTableWithIRI(gOnt1, model1);
-				    			str = Log.getText();
-				    			str = str + "\n" + "Ontology successfully loaded as Ontology 1";
-				    			Log.setText(str);
-				    			HideIRI1 = false;
-				    			//loading possible Projection on jTable2
-				    			str = (String)(jComboBoxOperation.getSelectedItem());
-				    			if(str.equals("Projection"))
-				    			{
-				    				ProjectionTableModel model2 = new ProjectionTableModel();
-				    				jTable2.setModel(model2);
-				    				fillProjectionList(gOnt1, model2);	    				
-				    			}
-				    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    					}catch(Exception ex)
-	    					{
-	    						str = Log.getText() + "\nError : " + ex.getMessage();
-	    		    			Log.setText(str);
-	    		    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    		    			return;
-	    					}
-		    			}
-	    			};
-	    			worker.start();
-	    		}
-	    		catch(Exception ex)
-	    		{
-	    			str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    			return;
-	    		}
-    		}
-	    	/*
-	    	if(rVal == JFileChooser.CANCEL_OPTION) 
-	    	{
-	    		pathOnt1 = "";
-	    		nameOnt1 = "";
-	    		str = Log.getText() + "\n" + "You pressed cancel, no new Ontology was loaded";
-	    		Log.setText(str);
-	    	}
-	    	*/
-    	}
-	}
 	
-	/**
-	 * Implements file browser to get Ontology2 and load it in gOnt2 object
-	 * 
-	 * @author Romulo de Carvalho Magalhaes
-	 *
-	 */
-	public class OpenO2 implements ActionListener {
-	    
-		public void actionPerformed(ActionEvent e) 
-	    {
-	    	root = SwingUtilities.getRoot((JButton) e.getSource());
-			JFileChooser c = new JFileChooser();
-	    	String str;
-	    	//Show "Open" dialog:
-	    	int rVal = c.showOpenDialog(OntologyManagerTab.this);
-	    	if(rVal == JFileChooser.APPROVE_OPTION)
-	    	{
-	    		try{
-	    			enableButtons(false);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    			pathOnt2 = c.getSelectedFile().toString();//c.getSelectedFile().getName();
-	    			nameOnt2 = c.getSelectedFile().getName().toString();
-	    			str = Log.getText() + "\nLoading: " + pathOnt2;
-	    			Log.setText(str);
-	    			root.update(root.getGraphics());
-
-	    			Thread worker = new Thread() {
-	    				public void run() {
-	    					String str;
-	    					try{
-	    						str = Log.getText();
-		    					Normalization norm = new Normalization();
-		    					Object[]o =norm.runOntologyNormalization(pathOnt2, nameOnt2, osType);
-		    	    			String pathNorm = o[0].toString();
-		    	    			//exception inside normalization...
-				    			if(pathNorm.substring(0, 5).equals("Error"))
-				    			{
-				    				str = str + "\n" + pathNorm;
-				    				Log.setText(str);
-				    				enableButtons(true);
-		    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				    				return;
-				    			}
-				    			IRIOnt2 = o[1].toString();
-				    			System.out.print("\n Original IRI Ontology 2: " + IRIOnt2 + "\n");
-				    			Ont2 = loadOnt(pathNorm);
-				    			ConstraintGraph r = new ConstraintGraph();
-				    			gOnt2 = new Graph();
-				    			gOnt2 = r.createGraph(Ont2, Log);
-				    			//Ontology loaded into memory, cleaning table 1
-				    			DefaultTableModel model2 = new DefaultTableModel(
-				    					new Object [][] {
-
-				    					},
-				    					new String [] {
-				    							nameOnt2, ""
-				    					});
-				    			
-				    			jTable2.setModel(model2);
-				    			//fill table with ontology
-				    			ShowBottomWarning = true;
-				    			CleanUp = false;
-				    			model2 = fillJTableWithIRI(gOnt2, model2);
-				    			HideIRI2 = false;
-				    			str = Log.getText();
-				    			str = str + "\n" + "Ontology successfully loaded as Ontology 2";
-				    			Log.setText(str);
-				    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    					}catch(Exception ex)
-	    					{
-	    						str = Log.getText() + "\n" + ex.getMessage();
-	    		    			Log.setText(str);
-	    		    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    		    			return;
-	    					}
-		    			}
-	    			};
-	    			worker.start();
-	    		}
-	    		catch(Exception ex)
-	    		{
-	    			str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    			return;
-	    		}
-    		}
-	    	/*
-	    	if(rVal == JFileChooser.CANCEL_OPTION) 
-	    	{
-	    		pathOnt2 = "";
-	    		nameOnt2 = "";
-	    		str = Log.getText() + "\n" + "You pressed cancel, no new Ontology was loaded";
-	    		Log.setText(str);
-	    	}
-	    	*/
-	    }
-	}
-
-	/**
-	 * Implements file chooser to save resulting Ontology
-	 *
-	 * @author Rômulo de Carvalho Magalhães
-	 *
-	 */
-	public class SaveR implements ActionListener{
-	    public void actionPerformed(ActionEvent e)
-	    {
-	    	root = SwingUtilities.getRoot((JButton) e.getSource());
-	    	JFileChooser c = new JFileChooser();
-	    	String str = "";
-	    	
-	    	// Demonstrate "Save" dialog:
-	    	int rVal = c.showSaveDialog(OntologyManagerTab.this);
-	    	if(rVal == JFileChooser.APPROVE_OPTION)
-	    	{	
-	    		try{
-	    			pathOntResults = c.getSelectedFile().getAbsolutePath().toString();
-	    			nameOntResults = c.getSelectedFile().getName().toString();
-	    			int num = pathOntResults.lastIndexOf(".");
-	    			
-	    			if(num == -1)
-	    			{
-	    				pathOntResults = pathOntResults + "Normalized.owl";
-	    				nameOntResults = nameOntResults + "Normalized.owl";
-	    			}
-	    			else if (!pathOntResults.endsWith("Normalized.owl"))
-	    			{
-	    				String s = pathOntResults.substring(0, pathOntResults.lastIndexOf("."));
-	    				pathOntResults = pathOntResults + "Normalized.owl";
-	    				nameOntResults = nameOntResults + "Normalized.owl";
-	    			}
-	    			
-	    			/*
-	    			if(num == -1)
-	    			{
-	    				pathOntResults = pathOntResults + ".owl";
-	    				nameOntResults = nameOntResults + ".owl";
-	    			}
-	    			*/
-	    			enableButtons(false);
-	    			btnSave.setEnabled(false);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    			str = Log.getText() + "\nSaving Ontology as: " + pathOntResults;
-	    			Log.setText(str);
-	    			root.update(root.getGraphics());
-
-	    			Thread worker = new Thread() {
-	    				public void run() {
-	    					String str;
-	    					try{
-	    						//Save Ontology
-	    						SaveOntology.SaveOntologyToFile(pathOntResults, nameOntResults, gResults, Log);
-				    			
-				    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    					}catch(Exception ex)
-	    					{
-	    						str = Log.getText() + "\n" + ex.getMessage();
-	    		    			Log.setText(str);
-	    		    			enableButtons(true);
-	    		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    		    			return;
-	    					}
-		    			}
-	    			};
-	    			worker.start();
-	    		}
-	    		catch(Exception ex)
-	    		{
-	    			str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
-	    			enableButtons(true);
-	    			btnSave.setEnabled(true);
-	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	    			return;
-	    		}
-	    	}
-	    	if(rVal == JFileChooser.CANCEL_OPTION)
-	    	{
-	    		str = Log.getText() + "\n" + "You pressed cancel, Ontology was not saved";
-	    		Log.setText(str);
-	    	}
-	    }
-	}
 	
 	/**
 	 * Using the OWL API initializes the manager, ontology and datafactory from the file and returns the object containing it
@@ -1788,10 +893,10 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public Object[] loadOnt(String ontPath) 
 	{
-		String str = Log.getText();
+		String str = log;
 		Object[] obj = new Object[4];
 		try {	                
-			warninglbl.setVisible(false);
+			
 			OWLOntologyManager manager = (OWLOntologyManager) OWLManager.createOWLOntologyManager();
             IRI physicalURI = IRI.create( "file:" + ontPath);
             OWLOntology ontology = manager.loadOntologyFromOntologyDocument(physicalURI);	                
@@ -1805,9 +910,9 @@ public class OntologyManagerTab extends JFrame {
 		catch (OWLOntologyCreationException e) 
 		{
 				str = str +"\n" + "Error Loading Ontology : \n" + e.getMessage();
-				Log.setText(str);
-				warninglbl.setText("Error Loading : "+ ontPath);
-				warninglbl.setVisible(true);
+				log = log + " "+ str;
+				
+				
 		}
 	    return null;
     }
@@ -1823,20 +928,20 @@ public class OntologyManagerTab extends JFrame {
 	    public void actionPerformed(ActionEvent e) 
 	    {
 	    	root = SwingUtilities.getRoot((JButton) e.getSource());
-	    	String str;
+	    	String str = "";
 	    	try{
 	    		if(gOnt1 != null)
 	    		{
-	    			str = (String)(jComboBoxOperation.getSelectedItem());
+	    			
 	    			if(str.equals("Projection"))
 	    			{
-	    				runProjection();	    				
+	    				//runProjection();	    				
 	    			}else
 	    			{
 	    				if(gOnt2 == null)
 	    				{
-	    					str = Log.getText() + "\nPlease load Second Antology";
-	    	    			Log.setText(str);
+	    					str = log + "\nPlease load Second Antology";
+	    	    			log = log + " "+ str;
 	    	    			return;
 	    				}
 	    				if(str.equals("Union"))
@@ -1853,16 +958,16 @@ public class OntologyManagerTab extends JFrame {
 	    			
 	    		}else
 	    		{
-	    			str = Log.getText() + "\nPlease load an Antology first";
-	    			Log.setText(str);
+	    			str = log + "\nPlease load an Antology first";
+	    			log = log + " "+ str;
 	    			return;
 	    		}
     			
 	    	}catch(Exception ex)
 	    	{
-	    		str = Log.getText() + "\n" + ex.getMessage();
-    			Log.setText(str);
-    			enableButtons(true);
+	    		str = log + "\n" + ex.getMessage();
+    			log = log + " "+ str;
+    			
     			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    	}
 	    }
@@ -1874,10 +979,10 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public void runDifference()
 	{
-		enableButtons(false);
+		 
 		root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		String str = Log.getText() + "\nRunning Difference over " + pathOnt1 + " and " + pathOnt2;
-		Log.setText(str);
+		String str = log + "\nRunning Difference over " + pathOnt1 + " and " + pathOnt2;
+		log = log + " "+ str;
 		root.update(root.getGraphics());
 
 		Thread worker = new Thread() {
@@ -1896,7 +1001,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					str = Log.getText();
+					str = log;
 					/**
 					 * 1st I will get all the reachable from the 1st and the 2nd Ontologies
 					 * 
@@ -2148,12 +1253,12 @@ public class OntologyManagerTab extends JFrame {
 			        System.out.print("\n => End of Difference: \n");
 			        ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					fillJTableWithIRI(gResults,modelInc);
+					
 					HideIRIResults = false;
 					CleanUp = false;
-					str = Log.getText() + "\n" + "Difference Done!";
-	    			Log.setText(str);
-	    			enableButtons(true);
+					str = log + "\n" + "Difference Done!";
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			
 	    			//Time stamping
@@ -2165,10 +1270,10 @@ public class OntologyManagerTab extends JFrame {
 	    	        writer.close();
 				}catch(Exception ex)
 				{
-					str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
+					str = log + "\n" + ex.getMessage();
+	    			log = log + " "+ str;
 	    			gResults = null;
-	    			enableButtons(true);
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -2185,10 +1290,10 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public void runIntersection()
 	{
-		enableButtons(false);
+		 
 		root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		String str = Log.getText() + "\nRunning Intersection over " + pathOnt1 + " and " + pathOnt2;
-		Log.setText(str);
+		String str = log + "\nRunning Intersection over " + pathOnt1 + " and " + pathOnt2;
+		log = log + " "+ str;
 		root.update(root.getGraphics());
 
 		Thread worker = new Thread() {
@@ -2208,7 +1313,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					str = Log.getText();
+					str = log;
 					//run intersection
 					//1st we pick the vertices that are in both Ontologies
 					HashMap<Integer,Node> vertices1 = gOnt1.getVertices();
@@ -2372,12 +1477,12 @@ public class OntologyManagerTab extends JFrame {
 					System.out.print("\n => End of intersection: \n");
 			        ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					fillJTableWithIRI(gResults,modelInc);
+					
 					HideIRIResults = false;
 					CleanUp = false;
-					str = Log.getText() + "\n" + "Intersection done!";
-	    			Log.setText(str);
-	    			enableButtons(true);
+					str = log + "\n" + "Intersection done!";
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			
 	    			//Time stamping
@@ -2389,10 +1494,10 @@ public class OntologyManagerTab extends JFrame {
 	    	        writer.close();
 				}catch(Exception ex)
 				{
-					str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
+					str = log + "\n" + ex.getMessage();
+	    			log = log + " "+ str;
 	    			gResults = null;
-	    			enableButtons(true);
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -2407,10 +1512,10 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public void runUnion()
 	{
-		enableButtons(false);
+		 
 		root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		String str = Log.getText() + "\nRunning Union over " + pathOnt1 + " and " + pathOnt2;
-		Log.setText(str);
+		String str = log + "\nRunning Union over " + pathOnt1 + " and " + pathOnt2;
+		log = log + " "+ str;
 		root.update(root.getGraphics());
 
 		Thread worker = new Thread() {
@@ -2429,7 +1534,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					str = Log.getText();
+					str = log;
 					//1st we pick the vertices that are in both Ontologies
 					HashMap<Integer,Node> vertices1 = gOnt1.getVertices();
 					HashMap<Integer,Node> vertices2 = gOnt2.getVertices();
@@ -2619,12 +1724,12 @@ public class OntologyManagerTab extends JFrame {
 			        System.out.print("\n => End of Union: \n");
 			        ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					fillJTableWithIRI(gResults,modelInc);
+					
 					HideIRIResults = false;
 					CleanUp = false;
-					str = Log.getText() + "\n" + "Union done!";
-	    			Log.setText(str);
-	    			enableButtons(true);
+					str = log + "\n" + "Union done!";
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			
 	    			//Time stamping
@@ -2636,10 +1741,10 @@ public class OntologyManagerTab extends JFrame {
 	    	        writer.close();
 				}catch(Exception ex)
 				{
-					str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
+					str = log + "\n" + ex.getMessage();
+	    			log = log + " "+ str;
 	    			gResults = null;
-	    			enableButtons(true);
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -2652,12 +1757,12 @@ public class OntologyManagerTab extends JFrame {
 	 * Runs projection in another thread
 	 * 
 	 */
-	public void runProjection()
+/*	public void runProjection()
 	{
-		enableButtons(false);
+		 
 		root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		String str = Log.getText() + "\nRunning projection over " + pathOnt1;
-		Log.setText(str);
+		String str = log + "\nRunning projection over " + pathOnt1;
+		log = log + " "+ str;
 		root.update(root.getGraphics());
 
 		Thread worker = new Thread() {
@@ -2676,14 +1781,15 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 			    	
-					str = Log.getText();
-					ProjectionTableModel model2 = (ProjectionTableModel)jTable2.getModel();
+					str = log;
+					
 					ArrayList<Integer> checked = new ArrayList<Integer>();
 					ArrayList<Integer> unchecked = new ArrayList<Integer>();
 					ArrayList<String> uncheckedNames = new ArrayList<String>();
 					//1st I initialized the checked nodes list with the classes and properties checked
 					//and their complements
-					for(ProjectionItem p : model2.getProjectionItemList())
+					
+					for(ProjectionItem p : (ProjectionItem) model2.toArray(Pi))
 					{
 						if(p.getProjection())
 						{
@@ -2718,8 +1824,8 @@ public class OntologyManagerTab extends JFrame {
 					if(checked.isEmpty())
 					{
 						str = str + "\n" + "No nodes selected for Projection...";
-		    			Log.setText(str);
-		    			enableButtons(true);
+		    			log = log + " "+ str;
+		    			
 		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    			writer.close();
 		    			return;
@@ -2918,15 +2024,15 @@ public class OntologyManagerTab extends JFrame {
 						}
 					}
 					ShowBottomWarning = true;
-					fillJTableWithIRI(gResults,modelInc);
+					
 					HideIRIResults = false;
 					CleanUp = false;
 					ConstraintGraph rgd = new ConstraintGraph();
 					gResults = ConstraintGraph.addEdgesBetweenRC(gResults);
 			        gResults = rgd.searchBottomNodes(gResults);
-	    			str = Log.getText() + "\n" + "Projection done!";
-	    			Log.setText(str);
-	    			enableButtons(true);
+	    			str = log + "\n" + "Projection done!";
+	    			log = log + " "+ str;
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			
 	    			//Time stamping
@@ -2938,10 +2044,10 @@ public class OntologyManagerTab extends JFrame {
 	    	        writer.close();
 				}catch(Exception ex)
 				{
-					str = Log.getText() + "\n" + ex.getMessage();
-	    			Log.setText(str);
+					str = log + "\n" + ex.getMessage();
+	    			log = log + " "+ str;
 	    			gResults = null;
-	    			enableButtons(true);
+	    			
 	    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -2949,7 +2055,7 @@ public class OntologyManagerTab extends JFrame {
 		};
 		worker.start();
 		
-	}
+	}*/
 	
 	/**
 	 * Clear Results Tables
@@ -2963,9 +2069,9 @@ public class OntologyManagerTab extends JFrame {
 	               new String [] {
 	                   "Resulting Ontology", ""
 	               });				
-		jTableInc.setModel(modelInc);
+		
 		gResults = null;
-		btnSave.setEnabled(false);
+		
 		return modelInc;
 	}
 
@@ -2983,7 +2089,7 @@ public class OntologyManagerTab extends JFrame {
 				//root = SwingUtilities.getRoot((JButton) e.getSource());
 				String str = LogBatch;
 				try{
-					//enableButtons(false);
+					// 
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	    			CleanUp = true;
 	    			
@@ -3026,7 +2132,7 @@ public class OntologyManagerTab extends JFrame {
 		    				    					{
 		    				    						NodeRestrictionCardinality nrc;  
 	    				    						    NodeRestrictionCardinality nrc2; 
-	    				    						   // String tempstr = (String)(jComboBoxOperation.getSelectedItem());
+	    				    						   //  
 	    				    			    			if(operation.equals("Intersection"))
 	    				    			    			{
 	    				    			    				if(((NodeRestrictionCardinality)n).getCard() > ((NodeRestrictionCardinality)n2).getCard())
@@ -3112,7 +2218,7 @@ public class OntologyManagerTab extends JFrame {
 		    				    					{
 		    				    						NodeRestrictionComplementOfRestrictionCardinality nrc;
 		    				    						NodeRestrictionComplementOfRestrictionCardinality nrc2;
-		    				    						//String tempstr = (String)(jComboBoxOperation.getSelectedItem());
+		    				    						// 
 	    				    			    			if(operation.equals("Intersection"))
 	    				    			    			{
 	    				    			    				if(((NodeRestrictionCardinality)n).getCard() < ((NodeRestrictionCardinality)n2).getCard())
@@ -3258,9 +2364,9 @@ public class OntologyManagerTab extends JFrame {
 	    		    			               new String [] {
 	    		    			                   "Resulting Ontology", ""
 	    		    			               });				
-	    		    				//jTableInc.setModel(modelInc);
+	    		    				//
 	    			    			//fill table with ontology
-	    		    				//modelInc = fillJTableWithIRI(gResults, modelInc);
+	    		    				//
 	    		    			}
 	    		    			else
 	    		    			{
@@ -3272,12 +2378,12 @@ public class OntologyManagerTab extends JFrame {
 	    		    			               new String [] {
 	    		    			                   "Resulting Ontology", ""
 	    		    			               });				
-	    		    				//jTableInc.setModel(modelInc);
+	    		    				//
 	    			    			//fill table with ontology
-	    		    				//modelInc = fillJTableWithoutIRI(gResults, modelInc);
+	    		    				//
 	    		    			}*/
 	    				        
-	    		    			//enableButtons(true);
+	    		    			//
 	    		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    		    			//str = str + "\nMinimization Done!";
 	    		    			//LogBatch+=str;
@@ -3287,7 +2393,7 @@ public class OntologyManagerTab extends JFrame {
 	    						System.out.println(ex.getStackTrace());
 	    						//str = LogBatch + "\n" + ex.getMessage();
 	    		    			//LogBatch+=str;
-	    		    			//enableButtons(true);
+	    		    			//
 	    		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    		    			return;
 	    					}
@@ -3300,7 +2406,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(ex.getStackTrace());
 					//str = LogBatch + "\nError : " + ex.getMessage();
 	    			//LogBatch +=str;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -3345,8 +2451,8 @@ public class OntologyManagerTab extends JFrame {
     				nameOntResults = nameOntResults + ".owl";
     			}
     			*/
-    			//enableButtons(false);
-    			//btnSave.setEnabled(false);
+    			// 
+    			//
     			//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     			//LogBatch+= "\nSaving Ontology as: " + pathOntResults + "\n";
     			//System.out.println(LogBatch);
@@ -3359,15 +2465,15 @@ public class OntologyManagerTab extends JFrame {
     						//Save Ontology
     						//SaveOntology.SaveOntologyToFile(pathOntResults, nameOntResults, gResults, Log);
     						// save without the normalized for batch process
-    						SaveOntology.SaveOntologyToFile(path+file, nameOntResults, gResults, Log);
+    						SaveOntology.SaveOntologyToFile(path+file, nameOntResults, gResults, LogBatch);
 			    			
-			    			//enableButtons(true);
+			    			//
     		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     					}catch(Exception ex)
     					{
     						LogBatch += "\n erro saveRbatch:" + ex.getMessage();
-    		    			//Log.setText(str);
-    		    			//enableButtons(true);
+    		    			//log = log + " "+ str;
+    		    			//
     		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     		    			return;
     					}
@@ -3379,16 +2485,16 @@ public class OntologyManagerTab extends JFrame {
     		{
     			//LogBatch+= "\n saveRbatch: " + ex.getMessage();
     			ex.printStackTrace();
-    			//enableButtons(true);
-    			//btnSave.setEnabled(true);
+    			//
+    			//
     			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     			return;
     		}
     	//}
     	/*if(rVal == JFileChooser.CANCEL_OPTION)
     	{
-    		str = Log.getText() + "\n" + "You pressed cancel, Ontology was not saved";
-    		Log.setText(str);
+    		str = log + "\n" + "You pressed cancel, Ontology was not saved";
+    		log = log + " "+ str;
     	}*/
    // }
 
@@ -3401,7 +2507,7 @@ public class OntologyManagerTab extends JFrame {
     	try{
     		if(gOnt1 != null)
     		{
-    			//str = (String)(jComboBoxOperation.getSelectedItem());
+    			//
     			str = operation;
     			
     			if(str.equals("Projection"))
@@ -3411,8 +2517,8 @@ public class OntologyManagerTab extends JFrame {
     			{
     				if(gOnt2 == null)
     				{
-    					//str = Log.getText() + "\nPlease load Second Antology";
-    	    			//Log.setText(str);
+    					//str = log + "\nPlease load Second Antology";
+    	    			//log = log + " "+ str;
     					LogBatch += "\nPlease load Second Antology";
     	    			return;
     				}
@@ -3440,7 +2546,7 @@ public class OntologyManagerTab extends JFrame {
     	{
     		LogBatch+= "\n Error runOntBatch" + ex.getMessage();
     		//System.out.println(LogBatch);
-			//enableButtons(true);
+			//
 			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     	}
 
@@ -3450,7 +2556,7 @@ public class OntologyManagerTab extends JFrame {
 		// TODO Auto-generated method stub
 		String str;
 		try{
-			//enableButtons(false);
+			// 
 			//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			//pathOnt1 = c.getSelectedFile().toString();
 			//nameOnt1 = c.getSelectedFile().getName().toString();
@@ -3473,7 +2579,7 @@ public class OntologyManagerTab extends JFrame {
 		    			{
 		    				str = str + "\n" + pathNorm;
 		    				LogBatch += str;
-		    				//enableButtons(true);
+		    				//
     		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    				return;
 		    			}
@@ -3524,21 +2630,21 @@ public class OntologyManagerTab extends JFrame {
 		    			//LogBatch += str;
 		    			HideIRI1 = false;
 		    			//loading possible Projection on jTable2
-		    			/*str = (String)(jComboBoxOperation.getSelectedItem());
+		    			/*
 		    			if(str.equals("Projection"))
 		    			{
 		    				ProjectionTableModel model2 = new ProjectionTableModel();
 		    				jTable2.setModel(model2);
 		    				fillProjectionList(gOnt1, model2);	    				
 		    			}
-		    			enableButtons(true);
+		    			
 		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    			*/
 					}catch(Exception ex)
 					{
 						LogBatch+= "\nError openBatch2 : " + ex.getMessage();
 						//System.out.println(LogBatch);
-		    			//enableButtons(true);
+		    			//
 		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    			return;
 					}
@@ -3550,7 +2656,7 @@ public class OntologyManagerTab extends JFrame {
 		{
 			LogBatch+= "\n Error openBatch2:" + ex.getMessage();
 			//System.out.println(LogBatch);
-			//enableButtons(true);
+			//
 			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			return;
 		}
@@ -3561,7 +2667,7 @@ public class OntologyManagerTab extends JFrame {
 		// TODO Auto-generated method stub
 		String str;
 		try{
-			//enableButtons(false);
+			// 
 			//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			//pathOnt1 = c.getSelectedFile().toString();
 			//nameOnt1 = c.getSelectedFile().getName().toString();
@@ -3587,7 +2693,7 @@ public class OntologyManagerTab extends JFrame {
 		    			{
 		    				str = str + "\n" + pathNorm;
 		    				LogBatch+=str;
-		    				//enableButtons(true);
+		    				//
     		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    				return;
 		    			}
@@ -3642,21 +2748,21 @@ public class OntologyManagerTab extends JFrame {
 		    			//LogBatch+=str;
 		    			HideIRI1 = false;
 		    			//loading possible Projection on jTable2
-		    			/*str = (String)(jComboBoxOperation.getSelectedItem());
+		    			/*
 		    			if(str.equals("Projection"))
 		    			{
 		    				ProjectionTableModel model2 = new ProjectionTableModel();
 		    				jTable2.setModel(model2);
 		    				fillProjectionList(gOnt1, model2);	    				
 		    			}
-		    			enableButtons(true);
+		    			
 		    			root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    			*/
 					}catch(Exception ex)
 					{
 						LogBatch+= "\nError openBatch1: " + ex.getMessage();
 		    			//System.out.println(LogBatch);
-		    			//enableButtons(true);
+		    			//
 		    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		    			return;
 					}
@@ -3668,7 +2774,7 @@ public class OntologyManagerTab extends JFrame {
 		{
 			LogBatch+= "\n Error openBatch1" + ex.getMessage();
 			//System.out.println(LogBatch);
-			//enableButtons(true);
+			//
 			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			return;
 		}
@@ -3686,7 +2792,7 @@ public class OntologyManagerTab extends JFrame {
 		String str = LogBatch;
 		Object[] obj = new Object[4];
 		try {	                
-			warninglbl.setVisible(false);
+			
 			OWLOntologyManager manager = (OWLOntologyManager) OWLManager.createOWLOntologyManager();
             IRI physicalURI = IRI.create( "file:" + ontPath);
             OWLOntology ontology = manager.loadOntologyFromOntologyDocument(physicalURI);	                
@@ -3702,7 +2808,7 @@ public class OntologyManagerTab extends JFrame {
 				str = str +"\n" + "Error Loading Ontology : \n" + e.getMessage();
 				LogBatch += str;
 				//warninglbl.setText("Error Loading : "+ ontPath);
-				//warninglbl.setVisible(true);
+				//
 		}
 	    return null;
     }
@@ -3713,7 +2819,7 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public void runDifferenceBatch()
 	{
-		//enableButtons(false);
+		// 
 		//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		//String str = LogBatch + "\nRunning Difference over " + pathOnt1 + " and " + pathOnt2;
 		//LogBatch+=str;
@@ -3735,7 +2841,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					//str = Log.getText();
+					//str = log;
 					/**
 					 * 1st I will get all the reachable from the 1st and the 2nd Ontologies
 					 * 
@@ -3987,12 +3093,12 @@ public class OntologyManagerTab extends JFrame {
 			        //System.out.print("\n => End of Difference: \n");
 			        //ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					//fillJTableWithIRI(gResults,modelInc);
+					//
 					HideIRIResults = false;
 					CleanUp = false;
 					//str = LogBatch + "\n" + "Difference Done!";
 	    			//LogBatch+=str;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			System.out.println("Minimize Graphs... after Difference: "+ pathOnt1 + " and " + pathOnt2);
 	    			minimizeGraphBatch("Difference");
@@ -4029,7 +3135,7 @@ public class OntologyManagerTab extends JFrame {
 					//str = LogBatch + "\n" + ex.getMessage();
 	    			//LogBatch+=str;
 	    			gResults = null;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -4044,7 +3150,7 @@ public class OntologyManagerTab extends JFrame {
 	 */
 	public void runIntersectionBatch()
 	{
-		//enableButtons(false);
+		// 
 		//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		String str = LogBatch + "\nRunning Intersection over " + pathOnt1 + " and " + pathOnt2;
 		LogBatch += str;
@@ -4067,7 +3173,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					str = Log.getText();
+					str = log;
 					//run intersection
 					//1st we pick the vertices that are in both Ontologies
 					HashMap<Integer,Node> vertices1 = gOnt1.getVertices();
@@ -4231,12 +3337,12 @@ public class OntologyManagerTab extends JFrame {
 					//System.out.print("\n => End of intersection: \n");
 			        //ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					//fillJTableWithIRI(gResults,modelInc);
+					//
 					HideIRIResults = false;
 					CleanUp = false;
 					//str = LogBatch + "\n" + "Intersection done!";
 	    			//LogBatch+=str;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			System.out.println("Minimize Graphs... after Intersection: "+ pathOnt1 + " and " + pathOnt2);
 	    			minimizeGraphBatch("Intersection");
@@ -4273,7 +3379,7 @@ public class OntologyManagerTab extends JFrame {
 					//str = LogBatch + "\n" + ex.getMessage();
 	    			//LogBatch+=str;
 	    			gResults = null;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -4285,7 +3391,7 @@ public class OntologyManagerTab extends JFrame {
 
 	public void runUnionBatch()
 	{
-		//enableButtons(false);
+		// 
 		//root.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		LogBatch+= "\nRunning Union Batch over " + pathOnt1 + " and " + pathOnt2;
 		//System.out.println(LogBatch);
@@ -4307,7 +3413,7 @@ public class OntologyManagerTab extends JFrame {
 					System.out.println(stamp);
 					writer = new BufferedWriter(new FileWriter(logFile));
 					
-					str = Log.getText();
+					str = log;
 					//1st we pick the vertices that are in both Ontologies
 					HashMap<Integer,Node> vertices1 = gOnt1.getVertices();
 					HashMap<Integer,Node> vertices2 = gOnt2.getVertices();
@@ -4497,12 +3603,12 @@ public class OntologyManagerTab extends JFrame {
 			        //System.out.print("\n => End of Union: \n");
 			        //ConstraintGraph.Graph2Console(gResults);
 			        ShowBottomWarning = true;
-					//fillJTableWithIRI(gResults,modelInc);
+					//
 					HideIRIResults = false;
 					CleanUp = false;
 					//str = LogBatch + "\n" + "Union done!";
 	    			//LogBatch +=str;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			System.out.println("Minimize Graphs... after Union: "+ pathOnt1 + " and " + pathOnt2);
 	    			minimizeGraphBatch("Union");
@@ -4537,7 +3643,7 @@ public class OntologyManagerTab extends JFrame {
 					LogBatch+= "\n" + ex.getMessage();
 					//System.out.println(LogBatch);
 	    			gResults = null;
-	    			//enableButtons(true);
+	    			//
 	    			//root.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    			return;
 				}
@@ -4837,8 +3943,6 @@ public class OntologyManagerTab extends JFrame {
 		// TODO Auto-generated method stub
 		// carrega OS da máquina
 		getOSType();
-		
-		Log = new JTextArea(); // to keep compatibility with the log 
 		
 		this.writeTimeStamp("inicio ontology manager");
 		
@@ -5171,7 +4275,7 @@ public class OntologyManagerTab extends JFrame {
 		//}// else net1 and 2 > 2
 		
 		System.out.println("--Log JTextArea ---");
-		System.out.println(Log.getText());
+		System.out.println(log);
 		System.out.println("--LogBatch ---");
 		//System.out.println(LogBatch);
 		

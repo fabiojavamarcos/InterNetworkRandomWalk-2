@@ -7,7 +7,14 @@ public class Visit {
 	private Node node;
 	private int rwNumber; // rw loop where visit has made
 	private int hop; // hop number when the node was visited
+	private String path;
 	
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
 	public int getHop() {
 		return hop;
 	}
