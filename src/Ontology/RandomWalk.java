@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import Model.Bag;
 import Model.Visit;
 
 
@@ -50,8 +51,29 @@ public class RandomWalk {
     private HashMap<Integer,String>  nodesNames = new HashMap();
     private HashSet<String> words = new HashSet();
     private ArrayList<Integer> binaryFlag = new ArrayList();
-    
+    private int windowSize;
+    private int offSet;
+    private ArrayList<String> visitRWLap = new ArrayList();
+    private int randomInit = 0;
+    private ArrayList<Bag> bags = new ArrayList(); 
+
 	
+	public int getWindowSize() {
+		return windowSize;
+	}
+
+	public void setWindowSize(int windowSize) {
+		this.windowSize = windowSize;
+	}
+
+	public int getOffSet() {
+		return offSet;
+	}
+
+	public void setOffSet(int offSet) {
+		this.offSet = offSet;
+	}
+
 	public int getTop() {
 		return top;
 	}
@@ -193,6 +215,119 @@ public class RandomWalk {
 	}
 	
 	/**
+	 * Calculates all the reachable nodes from all the nodes for the graph in memory
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public HashMap fullrw()
+	{
+		Set cont = g.getVertices().entrySet();
+		int sumVertices = cont.size();
+	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
+	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
+	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
+	           
+        int rwNumber = 0;
+        while (rwNumber < max) {
+        	Iterator i = (Iterator) cont.iterator();
+        	int countEntries = 0;
+        	//int randomInit = (int) (Math.random()*(sumVertices-1))+1;
+        	randomInit = (int) (Math.random()*(sumVertices));
+        	
+        	if(this.getForceStartNodeNummber()<sumVertices) {
+        		randomInit = this.getForceStartNodeNummber(); // start always from the same vertice (ramdom must be Y)
+        		// to avoid that use a number over the last vertice size
+        	}
+        	if(this.getTrace().contentEquals("Y")) {
+        		System.out.println("rw number: "+ rwNumber);
+        		System.out.println(" Count Entries "+countEntries);
+        		System.out.println(" randomInit "+ randomInit);
+        	}
+	        while(i.hasNext()) 
+	        {
+	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+	        	int nID = n.getValue().getId();
+	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
+	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
+		        	if (countEntries == randomInit){ //random start
+		        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+		        		rw(nID, rwNumber);
+		        		//printVisitOrder(count);
+		        		//printFrequency(count, cont);
+		        		//printAnt(count);
+		        		genRWBags(rwNumber);
+		        	}
+	        	}
+		        else {
+		        	printName(n.getValue().getFullName(), nID+"");
+	        		rw(nID, rwNumber);
+		        }
+				this.calculated[nID] += 1;
+				countEntries++;
+	        }
+	        rwNumber ++;
+        }
+        printVisitOrder(max);
+		printFrequency(max, cont);
+		binaryCSV();
+		bagCSV();
+
+		printAnt(max);
+        this.calculatedFull = true;
+        // fecha o arquivo de ordem de visita
+		try {
+			writer.flush();
+			writer.close();
+
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		Collections.sort(overAllVisits);
+		ArrayList<Integer> top3 = new ArrayList<Integer>(overAllVisits.subList(overAllVisits.size() -3, overAllVisits.size()));
+		return visited_ant;
+
+		
+	    //return returnTop(max,cont,top);
+ 
+        
+        // print the visit chain root and child
+        /*
+        cont = visited_ant.entrySet();
+        it = (Iterator) cont.iterator();
+        fileName = System.getProperty("user.home")+"/visits_ant.csv";
+        writer = null;
+        try {
+			writer = new FileWriter(fileName);
+			writer.append("root");
+			writer.append(",");
+			writer.append("child\n");
+	        while (it.hasNext()) {
+	        	Map.Entry<Node, Node> nIt = (Map.Entry<Node, Node>) it.next();
+	        	int nIDiT = nIt.getValue().getId();
+	        	int nKey  = nIt.getKey().getId();
+	        	
+	        	System.out.println(" root " + formatName(nIt.getKey().getFullName()) + "followed by child" + formatName(nIt.getValue().getFullName()));
+	        
+					writer.append(formatName(nIt.getKey().getFullName()));
+					writer.append(",");
+					writer.append(formatName(nIt.getValue().getFullName()));
+	        	
+	        }
+        
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} */
+        //for (int i = 0; i < overAllVisits.size(); i++) {
+        //	System.out.println(" node: " + i + " nome " + cont.get(i).getFullName());
+        //}
+	}
+	
+	/**
 	 * Do the Breadth First Search for a given root node and save all the nodes reachable from that 1st one
 	 * 
 	 * @param root
@@ -203,6 +338,7 @@ public class RandomWalk {
 		Queue<Integer> queue = new LinkedList<Integer>();
 	    queue.add(root);
 	    visited.set(root, 1);
+	    visitRWLap = new ArrayList(); // initialize (erase last lap info)
 	   
 	    String path = "";
 	    ArrayList<LinkedList<Integer>> tempAdj = this.g.getAdj();
@@ -256,6 +392,7 @@ public class RandomWalk {
 	    vis.setHop(0);
 	    vis.setPath(path);
 	    visitList.add(vis); // dataset with the order of visit
+	    visitRWLap.add(path); // dataset with paths per lap
 	    int countVisited = 0;
 	    //while(!queue.isEmpty())
 	    boolean hasPath = true;
@@ -387,7 +524,8 @@ public class RandomWalk {
                 	    vis.setHop(countVisited);
                 	    vis.setPath(path);
                 	    visitList.add(vis); // dataset with the order of visit
-                	    
+                	    visitRWLap.add(nname); // dataset with nodes visited per lap
+
                     	queue.add(child);
                     	LinkedList<Integer> tempR = this.reachable.get(root);
                     	tempR.add(child);
@@ -430,126 +568,59 @@ public class RandomWalk {
 	    return visited;
 	}
 	
-	/**
-	 * Calculates all the reachable nodes from all the nodes for the graph in memory
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public HashMap fullrw()
-	{
-		Set cont = g.getVertices().entrySet();
-		int sumVertices = cont.size();
-	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
-	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
-	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
-	           
-        int rwNumber = 0;
-        while (rwNumber < max) {
-        	Iterator i = (Iterator) cont.iterator();
-        	int countEntries = 0;
-        	int randomInit = (int) (Math.random()*(sumVertices-1))+1;
-        	
-        	if(this.getForceStartNodeNummber()<sumVertices) {
-        		randomInit = this.getForceStartNodeNummber(); // start always from the same vertice (ramdom must be Y)
-        		// to avoid that use a number over the last vertice size
-        	}
+    private void genRWBags(int rwNumber) {
+    	int start = 0;
+    	int end = windowSize;
+    	String bag = "";
+    	boolean hasStep = true; // check if is possible to get another bag
+    	if (end > visitRWLap.size()) {
         	if(this.getTrace().contentEquals("Y")) {
-        		System.out.println("rw number: "+ rwNumber);
-        		System.out.println(" Count Entries "+countEntries);
-        		System.out.println(" randomInit "+ randomInit);
+        		System.out.println(" start:"+start+ " end:"+ end + " windowSize: "+ windowSize + " offSet:" + offSet);
+        		System.out.println("Not possible to have a bag with that window size. Started in " + randomInit + " RW # : "+ rwNumber);
         	}
-	        while(i.hasNext()) 
-	        {
-	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
-	        	int nID = n.getValue().getId();
-	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
-	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
-		        	if (countEntries == randomInit){ //random start
-		        		printName(n.getValue().getFullName(), nID+"");
-		        		rw(nID, rwNumber);
-		        		//printVisitOrder(count);
-		        		//printFrequency(count, cont);
-		        		//printAnt(count);
-		        	}
-	        	}
-		        else {
-		        	printName(n.getValue().getFullName(), nID+"");
-	        		rw(nID, rwNumber);
-		        }
-				this.calculated[nID] += 1;
-				countEntries++;
-	        }
-	        rwNumber ++;
-        }
-        printVisitOrder(max);
-		printFrequency(max, cont);
-		binaryCSV();
+    	} else {
+    		while (hasStep) {
+    			for (int i = start; i<end; i++)// get paths of the lap
+    				bag += visitRWLap.get(i) + " ";
+    			
+    			Bag b = new Bag();
+    			b.setStartNode(randomInit);
+    			b.setBag(bag);
+    			bags.add(b);
+    			start += offSet;
+    			end = start+windowSize;
+    			bag = ""; 
+    		   	if (end > visitRWLap.size()) {
+    	        	if(this.getTrace().contentEquals("Y")) {
+    	        		System.out.println(" start:"+start+ " end:"+ end + " windowSize: "+ windowSize + " offSet:" + offSet);
 
-		printAnt(max);
-        this.calculatedFull = true;
-        // fecha o arquivo de ordem de visita
-		try {
-			writer.flush();
-			writer.close();
-
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		Collections.sort(overAllVisits);
-		ArrayList<Integer> top3 = new ArrayList<Integer>(overAllVisits.subList(overAllVisits.size() -3, overAllVisits.size()));
-		return visited_ant;
-
-		
-	    //return returnTop(max,cont,top);
- 
-        
-        // print the visit chain root and child
-        /*
-        cont = visited_ant.entrySet();
-        it = (Iterator) cont.iterator();
-        fileName = System.getProperty("user.home")+"/visits_ant.csv";
-        writer = null;
-        try {
-			writer = new FileWriter(fileName);
-			writer.append("root");
-			writer.append(",");
-			writer.append("child\n");
-	        while (it.hasNext()) {
-	        	Map.Entry<Node, Node> nIt = (Map.Entry<Node, Node>) it.next();
-	        	int nIDiT = nIt.getValue().getId();
-	        	int nKey  = nIt.getKey().getId();
-	        	
-	        	System.out.println(" root " + formatName(nIt.getKey().getFullName()) + "followed by child" + formatName(nIt.getValue().getFullName()));
-	        
-					writer.append(formatName(nIt.getKey().getFullName()));
-					writer.append(",");
-					writer.append(formatName(nIt.getValue().getFullName()));
-	        	
-	        }
-        
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} */
-        //for (int i = 0; i < overAllVisits.size(); i++) {
-        //	System.out.println(" node: " + i + " nome " + cont.get(i).getFullName());
-        //}
-	}
+    	        		System.out.println("Not possible to have a bag with that window size. Started in " + randomInit + " RW # : "+ rwNumber);
+    	        	}
+    	        	hasStep = false;
+    	    	}
+    		}
+    	}
+    	
+    }
 	
-	private void binaryCSV() {
+	private void bagCSV() {
+		// TODO Auto-generated method stub
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
-		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
+		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
-			String header = "nodeId,";
+			String header = "nodeNumber,";
+			boolean isFirst = true;
 			while(i.hasNext()) {
-				header+=i.next()+",";
+				if (!isFirst) {
+					header+=",";
+					
+				} else {
+					isFirst = false;
+				}
+				header+=i.next();
 				
 			}
 			header+="\n";
@@ -557,21 +628,30 @@ public class RandomWalk {
 			String line = "";
 			
 			
-			for (int j = 0; j<overAllPaths.size();j++) {
+			for (int j = 0; j<bags.size();j++) {
 				//line = (String) j.j.next()+",";
-				line = j+",";
+				Bag b = bags.get(j);
+				line = b.getStartNode()+",";
 				//while(j.hasNext()) {
 				i = words.iterator();
-				String find = (String) overAllPaths.get(j);
+				
+				String find = (String) b.getBag();
+				isFirst = true;
 				while(i.hasNext()) {
 					String tpath = (String) i.next();
+					if (!isFirst) {
+						line+=",";
+						
+					} else {
+						isFirst = false;
+					}
 					//String find = (String) j.next();
 					if (find.length()>2)
 						find = find.trim(); 
-					if (find.indexOf(tpath)!=-1) {
-						line+="1,";
+					if (find.indexOf(tpath)!=-1) { //optimistic if the node is a substring then match!
+						line+="1";
 					} else {
-						line+="0,";
+						line+="0";
 					}
 				}
 				writer.append(line+"\n");
@@ -585,6 +665,68 @@ public class RandomWalk {
 			e.printStackTrace();
 		}
 	}
+
+
+	private void binaryCSV() {
+		Iterator i = words.iterator();
+		//Iterator j = overAllPaths.iterator();
+		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
+		writer = null;
+		try {
+			writer = new FileWriter(fileName);
+			String header = "nodeNumber,";
+			boolean isFirst = true;
+			while(i.hasNext()) {
+				if (!isFirst) {
+					header+=",";
+					
+				} else {
+					isFirst = false;
+				}
+				header+=i.next();
+				
+			}
+			header+="\n";
+			writer.append(header);
+			String line = "";
+			
+			
+			for (int j = 0; j<overAllPaths.size();j++) {
+				//line = (String) j.j.next()+",";
+				line = j+",";
+				//while(j.hasNext()) {
+				i = words.iterator();
+				String find = (String) overAllPaths.get(j);
+				isFirst = true;
+				while(i.hasNext()) {
+					String tpath = (String) i.next();
+					if (!isFirst) {
+						line+=",";
+						
+					} else {
+						isFirst = false;
+					}
+					//String find = (String) j.next();
+					if (find.length()>2)
+						find = find.trim(); 
+					if (find.indexOf(tpath)!=-1) {
+						line+="1";
+					} else {
+						line+="0";
+					}
+				}
+				writer.append(line+"\n");
+			}
+			writer.flush();
+			writer.close();
+			
+		}
+		 catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void printVisitOrder(int count) {
 		// print visit order
         Iterator it = (Iterator) visitList.iterator();

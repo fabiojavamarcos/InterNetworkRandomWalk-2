@@ -99,6 +99,8 @@ public class Control {
     private int forceStartNodeNummber; // number indicating the node to start always at each rw. if number > size of vertices use the ramdom 
     private String runMode; // C = class, P = properties, B = Both
     private int topItens; // number of top visited to return 
+    private int windowSize = 0;
+    private int offSet = 0;
      
     private HashMap top;
 	/**
@@ -142,6 +144,8 @@ public class Control {
 	    trace = args[9];
 	    forceStartNodeNummber = Integer.parseInt(args[10]);
 	    runMode = args[11];
+	    windowSize = Integer.parseInt(args[12]);
+	    offSet = Integer.parseInt(args[13]);
 	    
 		if (runMode.equals("B")) {		
 			// run first randonWalk
@@ -155,6 +159,8 @@ public class Control {
 			rw0.setTrace(trace);
 			rw0.setForceStartNodeNummber(forceStartNodeNummber);
 			rw0.setTop(topItens);
+			rw0.setOffSet(offSet);
+			rw0.setWindowSize(windowSize);
 			
 			//Random randRoot = new Random();
 			//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
@@ -172,6 +178,9 @@ public class Control {
 			rw1.setTrace(trace);
 			rw1.setForceStartNodeNummber(forceStartNodeNummber);
 			rw1.setTop(topItens);
+			rw1.setOffSet(offSet);
+			rw1.setWindowSize(windowSize);
+
 	
 			top =  rw1.fullrw();
 			
@@ -187,7 +196,9 @@ public class Control {
 					rw0.setTrace(trace);
 					rw0.setForceStartNodeNummber(forceStartNodeNummber);
 					rw0.setTop(topItens);
-					
+					rw0.setOffSet(offSet);
+					rw0.setWindowSize(windowSize);
+
 					//Random randRoot = new Random();
 					//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
 					//System.out.println("calling RandomWalk with root:"+ root + " selecting "+ gOnt1.getNumVertices());
@@ -206,6 +217,9 @@ public class Control {
 						rw1.setTrace(trace);
 						rw1.setForceStartNodeNummber(forceStartNodeNummber);
 						rw1.setTop(topItens);
+						rw1.setOffSet(offSet);
+						rw1.setWindowSize(windowSize);
+
 				
 						top = rw1.fullrw();
 					} else { 
@@ -220,6 +234,8 @@ public class Control {
 							rw1.setTrace(trace);
 							rw1.setForceStartNodeNummber(forceStartNodeNummber);
 							rw1.setTop(topItens);
+							rw1.setOffSet(offSet);
+							rw1.setWindowSize(windowSize);
 					
 							top = rw1.fullrw();
 						}
