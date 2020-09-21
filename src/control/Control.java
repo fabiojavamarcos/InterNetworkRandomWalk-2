@@ -101,6 +101,8 @@ public class Control {
     private int topItens; // number of top visited to return 
     private int windowSize = 0;
     private int offSet = 0;
+    private int turn = 1; // number of the turn
+    private ArrayList toDelete = new ArrayList();
      
     private HashMap top;
 	/**
@@ -133,10 +135,6 @@ public class Control {
 		
 		int max = Integer.parseInt(args[3]);
 		
-		OntologyManagerTab omt = new OntologyManagerTab();
-		omt.openBatch1(path, args[4]);
-		agOnt1 = omt.getAgOnt1();
-		
 		pathcsv= args[5]; // where the csv are stored
 		breakIfBackToNode = args[6]; // 
 	    randomizeFirstNodeEachRW = args[7]; // set a random 
@@ -146,21 +144,56 @@ public class Control {
 	    runMode = args[11];
 	    windowSize = Integer.parseInt(args[12]);
 	    offSet = Integer.parseInt(args[13]);
+	    turn = Integer.parseInt(args[14]);
+	    if (turn != 1) {
+	    	pathcsv=pathcsv+turn; // add the number of the turn to the path do distinguish csv files
+	    }
+	    int k = 15;
+	    
+	    while(k<args.length) {
+	    	System.out.println("To Delete:"+args[k]);
+	    	toDelete.add(args[k]);
+	    	k++;
+	    }
+
+	   
+		OntologyManagerTab omt = new OntologyManagerTab();
+		omt.openBatch1(path, args[4]);
+		agOnt1 = omt.getAgOnt1();
+		
+	    
+		RandomWalk rw0 = new RandomWalk(agOnt1[0], args[4]+"_class_"+max, max);
+		
+		rw0.setSetBreakIfBackToNode(breakIfBackToNode);
+		rw0.setPathcsv(pathcsv);
+		rw0.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
+		rw0.setRestartSameRWIfLoop(restartSameRWIfLoop);
+		rw0.setTrace(trace);
+		rw0.setForceStartNodeNummber(forceStartNodeNummber);
+		rw0.setTop(topItens);
+		rw0.setOffSet(offSet);
+		rw0.setWindowSize(windowSize);
+		rw0.setTurn(turn);
+		rw0.setToDelete(toDelete);
+
+		RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
+		
+		rw1.setSetBreakIfBackToNode(breakIfBackToNode);
+		rw1.setPathcsv(pathcsv);
+		rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
+		rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
+		rw1.setTrace(trace);
+		rw1.setForceStartNodeNummber(forceStartNodeNummber);
+		rw1.setTop(topItens);
+		rw1.setOffSet(offSet);
+		rw1.setWindowSize(windowSize);
+		rw1.setTurn(turn);
+		rw1.setToDelete(toDelete);
+
 	    
 		if (runMode.equals("B")) {		
 			// run first randonWalk
 			System.out.println("Running Random Walk n "+max+" times (max) in Classes:"+args[4] );
-			RandomWalk rw0 = new RandomWalk(agOnt1[0], args[4]+"_class_"+max, max);
-			
-			rw0.setSetBreakIfBackToNode(breakIfBackToNode);
-			rw0.setPathcsv(pathcsv);
-			rw0.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-			rw0.setRestartSameRWIfLoop(restartSameRWIfLoop);
-			rw0.setTrace(trace);
-			rw0.setForceStartNodeNummber(forceStartNodeNummber);
-			rw0.setTop(topItens);
-			rw0.setOffSet(offSet);
-			rw0.setWindowSize(windowSize);
 			
 			//Random randRoot = new Random();
 			//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
@@ -169,17 +202,6 @@ public class Control {
 			top = rw0.fullrw();
 			
 			System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
-			RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
-			
-			rw1.setSetBreakIfBackToNode(breakIfBackToNode);
-			rw1.setPathcsv(pathcsv);
-			rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-			rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
-			rw1.setTrace(trace);
-			rw1.setForceStartNodeNummber(forceStartNodeNummber);
-			rw1.setTop(topItens);
-			rw1.setOffSet(offSet);
-			rw1.setWindowSize(windowSize);
 
 	
 			top =  rw1.fullrw();
@@ -187,17 +209,6 @@ public class Control {
 		}	else { 
 				if (runMode.equals("C")) {	
 					System.out.println("Running Random Walk n "+max+" times (max) in Classes:"+args[4] );
-					RandomWalk rw0 = new RandomWalk(agOnt1[0], args[4]+"_class_"+max, max);
-					
-					rw0.setSetBreakIfBackToNode(breakIfBackToNode);
-					rw0.setPathcsv(pathcsv);
-					rw0.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-					rw0.setRestartSameRWIfLoop(restartSameRWIfLoop);
-					rw0.setTrace(trace);
-					rw0.setForceStartNodeNummber(forceStartNodeNummber);
-					rw0.setTop(topItens);
-					rw0.setOffSet(offSet);
-					rw0.setWindowSize(windowSize);
 
 					//Random randRoot = new Random();
 					//int root = randRoot.nextInt((gOnt1.getNumVertices() - 1) + 1);
@@ -208,34 +219,12 @@ public class Control {
 				} else { 
 					if (runMode.equals("C")) {
 						System.out.println("Running Random Walk n "+max+" times (max) in Properties:"+args[4] );
-						RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
-						
-						rw1.setSetBreakIfBackToNode(breakIfBackToNode);
-						rw1.setPathcsv(pathcsv);
-						rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-						rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
-						rw1.setTrace(trace);
-						rw1.setForceStartNodeNummber(forceStartNodeNummber);
-						rw1.setTop(topItens);
-						rw1.setOffSet(offSet);
-						rw1.setWindowSize(windowSize);
 
 				
 						top = rw1.fullrw();
 					} else { 
 						if (runMode.equals("T")) {
 							System.out.println("Running Random Walk n "+max+" times (max) in Class and Properties:"+args[4] );
-							RandomWalk rw1 = new RandomWalk(gOnt1, args[4]+"_prop_"+max, max);
-							
-							rw1.setSetBreakIfBackToNode(breakIfBackToNode);
-							rw1.setPathcsv(pathcsv);
-							rw1.setRandomizeFirstNodeEachRW(randomizeFirstNodeEachRW);
-							rw1.setRestartSameRWIfLoop(restartSameRWIfLoop);
-							rw1.setTrace(trace);
-							rw1.setForceStartNodeNummber(forceStartNodeNummber);
-							rw1.setTop(topItens);
-							rw1.setOffSet(offSet);
-							rw1.setWindowSize(windowSize);
 					
 							top = rw1.fullrw();
 						}

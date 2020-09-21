@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * An implementation of DefaultTableModel to match our needs in case of a Projection
  *
- * @author Rômulo de Carvalho Magalhães
+ * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
  *
  */
 @SuppressWarnings("serial")

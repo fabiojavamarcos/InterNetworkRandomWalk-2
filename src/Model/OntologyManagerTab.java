@@ -1,7 +1,7 @@
 /**
  * Creates main tab and GUI inside protege to implement Logical Operations over Ontologies
  * 
- * @author Romulo de Carvalho Magalhaes
+ * @author Romulo de Carvalho Magalhaes - adapted by Fabio Marcos de Abreu Santos
  * @author Fabio Marcos de Abreu Santos - alter to run over network of ontologies.
  *
  */
@@ -488,7 +488,7 @@ public class OntologyManagerTab extends JFrame {
 	/**
 	 * Implements Show and Hide action for the Elements IRI in Ontology 2 
 	 *
-	 * @author Rômulo de Carvalho Magalhães
+	 * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
 	 *
 	 */
 	public class MinimizeGraph implements ActionListener {
@@ -823,7 +823,7 @@ public class OntologyManagerTab extends JFrame {
 	/**
 	 * Implements Show and Hide action for the Elements IRI in Ontology 2 
 	 *
-	 * @author Rômulo de Carvalho Magalhães
+	 * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
 	 *
 	 */
 	public class ShowHideIRIResults implements ActionListener {
@@ -921,7 +921,7 @@ public class OntologyManagerTab extends JFrame {
 	/**
 	 * Checks if the Ontologies are loaded correctly and call the operations runners
 	 *
-	 * @author Romulo de Carvalho Magalhaes
+	 * @author Romulo de Carvalho Magalhaes - adapted by Fabio Marcos de Abreu Santos
 	 *
 	 */
 	public class RunOnt implements ActionListener {
@@ -2078,7 +2078,7 @@ public class OntologyManagerTab extends JFrame {
 	/**
 	 * Implements Show and Hide action for the Elements IRI in Ontology 2 
 	 *
-	 * @author Rômulo de Carvalho Magalhães
+	 * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
 	 *
 	 */
 	public void minimizeGraphBatch (String operation){

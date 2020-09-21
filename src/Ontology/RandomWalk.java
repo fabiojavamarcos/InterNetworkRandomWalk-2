@@ -21,7 +21,7 @@ import Model.Visit;
 /**
  * This Class implements the Breadth First Search algorithm over the Graph Class to discover if there are paths between certain nodes
  *
- * @author Rômulo de Carvalho Magalhães
+ * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
  *
  */
 @SuppressWarnings("unused")
@@ -56,8 +56,26 @@ public class RandomWalk {
     private ArrayList<String> visitRWLap = new ArrayList();
     private int randomInit = 0;
     private ArrayList<Bag> bags = new ArrayList(); 
+    private ArrayList toDelete = new ArrayList();
+    private int turn =1;
 
 	
+	public int getTurn() {
+		return turn;
+	}
+
+	public void setTurn(int turn) {
+		this.turn = turn;
+	}
+
+	public ArrayList getToDelete() {
+		return toDelete;
+	}
+
+	public void setToDelete(ArrayList toDelete) {
+		this.toDelete = toDelete;
+	}
+
 	public int getWindowSize() {
 		return windowSize;
 	}
@@ -249,17 +267,40 @@ public class RandomWalk {
 	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
 	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
 		        	if (countEntries == randomInit){ //random start
-		        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
-		        		rw(nID, rwNumber);
-		        		//printVisitOrder(count);
-		        		//printFrequency(count, cont);
-		        		//printAnt(count);
-		        		genRWBags(rwNumber);
+		        		if (getTurn()>1) {
+		        			String shortName = getShortName(n.getValue().getFullName());
+		        			if (!findDeleted(shortName)) {
+				        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+				        		rw(nID, rwNumber);
+				        		//printVisitOrder(count);
+				        		//printFrequency(count, cont);
+				        		//printAnt(count);
+				        		genRWBags(rwNumber);
+		        			}
+		        		} else {
+			        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+			        		rw(nID, rwNumber);
+			        		//printVisitOrder(count);
+			        		//printFrequency(count, cont);
+			        		//printAnt(count);
+			        		genRWBags(rwNumber);
+
+		        		}
 		        	}
 	        	}
 		        else {
-		        	printName(n.getValue().getFullName(), nID+"");
-	        		rw(nID, rwNumber);
+	        		if (getTurn()>1) {
+	        			String shortName = getShortName(n.getValue().getFullName());
+	        			if (!findDeleted(shortName)) {
+
+				        	printName(n.getValue().getFullName(), nID+"");
+			        		rw(nID, rwNumber);
+	        			}
+	        		}else {
+			        	printName(n.getValue().getFullName(), nID+"");
+		        		rw(nID, rwNumber);
+
+	        		}
 		        }
 				this.calculated[nID] += 1;
 				countEntries++;
@@ -327,6 +368,18 @@ public class RandomWalk {
         //}
 	}
 	
+	private boolean findDeleted(String shortName) {
+		// TODO Auto-generated method stub
+		for (int i=0; i<toDelete.size(); i++) {
+			String toDeleteAux = (String) toDelete.get(i);
+			if (shortName.equals(toDeleteAux)) {
+				System.out.println("I found one. Ignoring...");
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Do the Breadth First Search for a given root node and save all the nodes reachable from that 1st one
 	 * 
@@ -449,22 +502,11 @@ public class RandomWalk {
         			//if (visited.get(child)==0 && count==randomPosition) 
         			if (tries==randomPosition)
                     {
-        				int visits = visited.get(child);
-        				
-                       	//if (visits < 2) {// to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
-                    		//printName(nodeVisited.getFullName(), obs);
- 
-	        			visits++;
-	        	        if(this.getTrace().contentEquals("Y"))
-
-        	        		System.out.println("Child to visit:" + child + " number of times in this rw: " + visits);
-                    	visited.set(child,visits); // acho que este cara tem que ficar dentro do if para somente contar qdo nao for o unico caminho possivel e igual ao pai dentro da mesma rw (dentro da full rw pode) 
-                    	
-                    	Node nodeVisited = grafo.get(child);
+        				Node nodeVisited = grafo.get(child);
+                    	//Node nodeVisited = grafo.get(child);
                     	tipo = nodeVisited.getNodeType();
                     	//obs = visits+"";
-                    	printName(nodeVisited.getFullName(), obs);
-                    	String nname = ""; 
+                     	String nname = ""; 
                     	if (tipo == NodeType.Class) {
                     		NodeClass noClasse = (NodeClass) nodeVisited;
                     		obs +=  "classe "+noClasse.getDescClass();
@@ -501,43 +543,102 @@ public class RandomWalk {
                     		path += " "+noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
                     		nname = noRestCompCard.getDescProp()+" "+noRestCompCard.getDescRangeOrDomain();
                     	}
-                    	
-                    	visited_ant.put(nodeVisited, nodeRoot); // dataset with dad child visits 
-                    	//if (visits < 2) // to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
-                    		//printName(nodeVisited.getFullName(), obs);
-                    	tempPath = overAllPaths.get(child);
-                    	tempPath=tempPath + " " + path;
-                    	overAllPaths.set(child, tempPath); // dataset with total visits per node
-                    	words.add(nname); // creates a new word in the dictionary of all words
-                    	
-                    	
-                    	total = overAllVisits.get(child);
-                	    total++;
-                	    overAllVisits.set(child, total); // dataset with total visits per node
-                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total, path);
- 
-                       	countVisited++;
-                        
-                	    vis = new Visit();
-                	    vis.setRwNumber(rwNumber);
-                	    vis.setNode(nodeVisited);
-                	    vis.setHop(countVisited);
-                	    vis.setPath(path);
-                	    visitList.add(vis); // dataset with the order of visit
-                	    visitRWLap.add(nname); // dataset with nodes visited per lap
 
-                    	queue.add(child);
-                    	LinkedList<Integer> tempR = this.reachable.get(root);
-                    	tempR.add(child);
+        				int visits = visited.get(child);
+        				
+                       	//if (visits < 2) {// to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
+                    		//printName(nodeVisited.getFullName(), obs);
+ 
+	        			visits++;
+	        	        if(this.getTrace().contentEquals("Y"))
+
+        	        		System.out.println("Child to visit:" + child + " number of times in this rw: " + visits);
+
+	        	        countVisited++;
+                        
+
+	        	        
+        				if (turn>1) {
+        					
+        					if (!findDeleted(nname)){
+        						
+        	                   	printName(nodeVisited.getFullName(), obs);
+
+		                    	visited.set(child,visits); // acho que este cara tem que ficar dentro do if para somente contar qdo nao for o unico caminho possivel e igual ao pai dentro da mesma rw (dentro da full rw pode) 
+		                    	
+		                    	
+		                    	visited_ant.put(nodeVisited, nodeRoot); // dataset with dad child visits 
+		                    	//if (visits < 2) // to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
+		                    		//printName(nodeVisited.getFullName(), obs);
+		                    	tempPath = overAllPaths.get(child);
+		                    	tempPath=tempPath + " " + path;
+		                    	overAllPaths.set(child, tempPath); // dataset with total visits per node
+		                    	words.add(nname); // creates a new word in the dictionary of all words
+		                    	
+		                    	
+		                    	total = overAllVisits.get(child);
+		                	    total++;
+		                	    overAllVisits.set(child, total); // dataset with total visits per node
+		                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total, path);
+		 
+		                	    vis = new Visit();
+		                	    vis.setRwNumber(rwNumber);
+		                	    vis.setNode(nodeVisited);
+		                	    vis.setHop(countVisited);
+		                	    vis.setPath(path);
+		                	    visitList.add(vis); // dataset with the order of visit
+		                	    visitRWLap.add(nname); // dataset with nodes visited per lap
+		
+		                    	queue.add(child);
+		                    	LinkedList<Integer> tempR = this.reachable.get(root);
+		                    	tempR.add(child);
+		                    	
+		                       	
+           					}
+            			} else {
+            				
+	                    	visited.set(child,visits); // acho que este cara tem que ficar dentro do if para somente contar qdo nao for o unico caminho possivel e igual ao pai dentro da mesma rw (dentro da full rw pode) 
+	                    	
+	                    	
+	                    	visited_ant.put(nodeVisited, nodeRoot); // dataset with dad child visits 
+	                    	//if (visits < 2) // to only print once the node (!?) verificar se ok - nao deveria marcar como visitado aqui denro???? Na verdade nao estou descartando ninguem!!! So no python
+	                    		//printName(nodeVisited.getFullName(), obs);
+	                    	tempPath = overAllPaths.get(child);
+	                    	tempPath=tempPath + " " + path;
+	                    	overAllPaths.set(child, tempPath); // dataset with total visits per node
+	                    	words.add(nname); // creates a new word in the dictionary of all words
+	                    	
+	                    	
+	                    	total = overAllVisits.get(child);
+	                	    total++;
+	                	    overAllVisits.set(child, total); // dataset with total visits per node
+	                	    accumulateAnt(root, nodeRoot.getFullName(),child, nodeVisited.getFullName(), total, path);
+	 	                        
+	                	    vis = new Visit();
+	                	    vis.setRwNumber(rwNumber);
+	                	    vis.setNode(nodeVisited);
+	                	    vis.setHop(countVisited);
+	                	    vis.setPath(path);
+	                	    visitList.add(vis); // dataset with the order of visit
+	                	    visitRWLap.add(nname); // dataset with nodes visited per lap
+	
+	                    	queue.add(child);
+	                    	LinkedList<Integer> tempR = this.reachable.get(root);
+	                    	tempR.add(child);
+	                       
+
+            			}
+        	        	if(this.getTrace().contentEquals("Y"))
+        	        		
+        	        		System.out.println("rw hop "+countVisited);
+
                     	// now the child became root 
+                    	
+        	        	
                      	root = child;
                      	nodeRoot = nodeVisited;
-                    	
-        	        	if(this.getTrace().contentEquals("Y"))
 
-        	        		System.out.println("rw hop "+countVisited);
-                       	//}
-                    	
+     
                     }
         			
         			tries++;
@@ -607,7 +708,8 @@ public class RandomWalk {
 		// TODO Auto-generated method stub
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
-		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
+		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
+		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -670,7 +772,8 @@ public class RandomWalk {
 	private void binaryCSV() {
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
-		String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
+		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
+		String fileName = pathcsv+"/visits_bin_"+name+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -732,8 +835,9 @@ public class RandomWalk {
         Iterator it = (Iterator) visitList.iterator();
         
         //String fileName = System.getProperty("user.home")+"/visits_order_"+name+".csv";
-        String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_order_"+name+".csv";
-        writer = null;
+        //String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_order_"+name+".csv";
+        String fileName = pathcsv+"/visits_order_"+name+".csv";
+       writer = null;
         try {
 			writer = new FileWriter(fileName);
 			writer.append("nodeId,nodeName,nodeType,nodeLevel,loop,hop,path\n");
@@ -779,8 +883,9 @@ public class RandomWalk {
         Iterator it = (Iterator) cont.iterator();
         
         //fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
-        String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
-        writer = null;
+       // String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
+        String fileName = pathcsv+"/visits_"+name+".csv";
+       writer = null;
         try {
 			writer = new FileWriter(fileName);
 			writer.append("nodeNumber");
@@ -865,6 +970,34 @@ public class RandomWalk {
 		}
 			
 	}
+	
+	private String getShortName(String nodeFullName) {
+		// TODO Auto-generated method stub
+		//if (n.getValue().getId()==290){
+		//	System.out.println(" id ="+ n.getValue().getId());
+		//}
+		if (nodeFullName.indexOf("MinCardinality")==-1&&nodeFullName.indexOf("ComplementOf")==-1&&nodeFullName.indexOf("~")==-1) {
+			int initialPosition = nodeFullName.lastIndexOf("/");
+			int finalPosition = nodeFullName.lastIndexOf(">");
+			if (finalPosition == -1){
+				finalPosition = nodeFullName.length();
+			}
+			String nodeName = nodeFullName.substring(initialPosition+1,finalPosition);
+			//String nodeName = n.getValue().getFullName().substring(initialPosition+1);
+        	if(this.getTrace().contentEquals("Y"))
+
+        		System.out.println(" ShortName: " + nodeName );
+			return nodeName;
+			
+		} else {
+        	if(this.getTrace().contentEquals("Y"))
+
+        		System.out.println(" ShortName not considered (complement or negation): " + nodeFullName );
+        	return null;
+		}
+			
+	}
+
 
 	private String formatName(String nodeFullName) {
 		// TODO Auto-generated method stub
