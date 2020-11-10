@@ -10,7 +10,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
  * Class containing small useful functions for OWL handling,
  * like extracting terms from IRIs and checking OWLObjects type
  * 
- * @author Romulo de Carvalho Magalhaes - adapted by Fabio Marcos de Abreu Santos
+ * 
  *
  */
 public class UsefulOWL {
@@ -238,8 +238,11 @@ public class UsefulOWL {
     { 
        if((classExpressionType.getName().equals("ObjectComplementOf"))&&(!desc.toString().contains("ObjectMinCardinality"))&&(!desc.toString().contains("ObjectMaxCardinality")))
            return true;
-       else
-           return false;
+       else //to deal with a bug in cmt ontology
+           if((classExpressionType.getName().equals("bjectComplementOf"))&&(!desc.toString().contains("ObjectMinCardinality"))&&(!desc.toString().contains("ObjectMaxCardinality")))
+        	   return true;
+           else
+        	   return false;
     }
 
     public static boolean isRestrictionComplementOfRestrictionCardinality(ClassExpressionType classExpressionType,OWLObject desc)
@@ -247,6 +250,9 @@ public class UsefulOWL {
        if((classExpressionType.getName().equals("ObjectComplementOf"))&&(desc.toString().contains("ObjectMinCardinality")))
            return true;
        else
-           return false;
+    	   if((classExpressionType.getName().equals("bjectComplementOf"))&&(desc.toString().contains("ObjectMinCardinality")))
+    		   return true;
+    	   else
+    		   return false;
     }
 }

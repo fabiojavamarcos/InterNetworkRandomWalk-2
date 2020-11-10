@@ -102,6 +102,8 @@ public class Control {
     private int windowSize = 0;
     private int offSet = 0;
     private int turn = 1; // number of the turn
+    private int threshold = 1; // percent limit to consider in rw
+
     private ArrayList toDelete = new ArrayList();
      
     private HashMap top;
@@ -136,19 +138,43 @@ public class Control {
 		int max = Integer.parseInt(args[3]);
 		
 		pathcsv= args[5]; // where the csv are stored
+		System.out.println("path csv: "+ pathcsv);
+		
 		breakIfBackToNode = args[6]; // 
+		System.out.println("breakIfBackToNode: "+ breakIfBackToNode);
+		
 	    randomizeFirstNodeEachRW = args[7]; // set a random 
+	    System.out.println("randomizeFirstNodeEachRW: "+ randomizeFirstNodeEachRW);
+	    
 	    restartSameRWIfLoop = args[8];
+	    System.out.println("restartSameRWIfLoop: "+ restartSameRWIfLoop);
+
 	    trace = args[9];
+	    System.out.println("trace: "+ trace);
+
 	    forceStartNodeNummber = Integer.parseInt(args[10]);
+	    System.out.println("forceStartNodeNummber: "+ forceStartNodeNummber);
+	    
 	    runMode = args[11];
+	    System.out.println("runMode: "+ runMode);
+	    
 	    windowSize = Integer.parseInt(args[12]);
+	    System.out.println("windowSize: "+ windowSize);
+
 	    offSet = Integer.parseInt(args[13]);
+	    System.out.println("offSet: "+ offSet);
+
 	    turn = Integer.parseInt(args[14]);
+	    System.out.println("turn: "+ turn);
+	    
+	    threshold = Integer.parseInt(args[15]);
+	    System.out.println("threshold: "+ threshold);
+
+
 	    if (turn != 1) {
 	    	pathcsv=pathcsv+turn; // add the number of the turn to the path do distinguish csv files
 	    }
-	    int k = 15;
+	    int k = 16; // position to start receiving the node to ignore
 	    
 	    while(k<args.length) {
 	    	System.out.println("To Delete:"+args[k]);
@@ -175,6 +201,7 @@ public class Control {
 		rw0.setWindowSize(windowSize);
 		rw0.setTurn(turn);
 		rw0.setToDelete(toDelete);
+		rw0.setThreshold(threshold);
 
 		RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
 		
@@ -189,6 +216,8 @@ public class Control {
 		rw1.setWindowSize(windowSize);
 		rw1.setTurn(turn);
 		rw1.setToDelete(toDelete);
+		rw1.setThreshold(threshold);
+
 
 	    
 		if (runMode.equals("B")) {		

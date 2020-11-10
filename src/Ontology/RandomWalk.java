@@ -21,7 +21,7 @@ import Model.Visit;
 /**
  * This Class implements the Breadth First Search algorithm over the Graph Class to discover if there are paths between certain nodes
  *
- * @author Rômulo de Carvalho Magalhães - adapted by Fabio Marcos de Abreu Santos - adapted by Fabio Marcos de Abreu Santos
+ * 
  *
  */
 @SuppressWarnings("unused")
@@ -58,8 +58,19 @@ public class RandomWalk {
     private ArrayList<Bag> bags = new ArrayList(); 
     private ArrayList toDelete = new ArrayList();
     private int turn =1;
+    private int threshold = 100;
+	private HashMap<String, Integer> nameNode = new HashMap();;
+	private HashMap<String, Integer> overAllVisitsNodeName = new HashMap();;
 
 	
+	public int getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
+	}
+
 	public int getTurn() {
 		return turn;
 	}
@@ -264,53 +275,56 @@ public class RandomWalk {
 	        {
 	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
 	        	int nID = n.getValue().getId();
+    			String shortName = getShortName(n.getValue().getFullName());
+    			if (shortName!="") {
 	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
-	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
-		        	if (countEntries == randomInit){ //random start
-		        		if (getTurn()>1) {
-		        			String shortName = getShortName(n.getValue().getFullName());
-		        			if (!findDeleted(shortName)) {
+		        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
+			        	if (countEntries == randomInit){ //random start
+			        		if (getTurn()>1) {
+			        			if (!findDeleted(shortName)) {
+					        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+					        		rw(nID, rwNumber);
+					        		//printVisitOrder(count);
+					        		//printFrequency(count, cont);
+					        		//printAnt(count);
+					        		genRWBags(rwNumber);
+			        			}
+			        		} else {
 				        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
 				        		rw(nID, rwNumber);
 				        		//printVisitOrder(count);
 				        		//printFrequency(count, cont);
 				        		//printAnt(count);
 				        		genRWBags(rwNumber);
-		        			}
-		        		} else {
-			        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
-			        		rw(nID, rwNumber);
-			        		//printVisitOrder(count);
-			        		//printFrequency(count, cont);
-			        		//printAnt(count);
-			        		genRWBags(rwNumber);
-
-		        		}
+	
+			        		}
+			        	}
 		        	}
-	        	}
-		        else {
-	        		if (getTurn()>1) {
-	        			String shortName = getShortName(n.getValue().getFullName());
-	        			if (!findDeleted(shortName)) {
-
+			        else {
+		        		if (getTurn()>1) {
+//		        			String shortName = getShortName(n.getValue().getFullName());
+		        			if (!findDeleted(shortName)) {
+	
+					        	printName(n.getValue().getFullName(), nID+"");
+				        		rw(nID, rwNumber);
+		        			}
+		        		}else {
 				        	printName(n.getValue().getFullName(), nID+"");
 			        		rw(nID, rwNumber);
-	        			}
-	        		}else {
-			        	printName(n.getValue().getFullName(), nID+"");
-		        		rw(nID, rwNumber);
-
-	        		}
-		        }
+	
+		        		}
+			        }
+    			}
 				this.calculated[nID] += 1;
 				countEntries++;
 	        }
 	        rwNumber ++;
         }
+        int thresholdValue = calcThresholdValue();
         printVisitOrder(max);
 		printFrequency(max, cont);
 		binaryCSV();
-		bagCSV();
+		bagCSV(thresholdValue);
 
 		printAnt(max);
         this.calculatedFull = true;
@@ -368,6 +382,26 @@ public class RandomWalk {
         //}
 	}
 	
+	private int calcThresholdValue() {
+		// TODO Auto-generated method stub
+		int maxValue = 0;
+		for (Iterator i = overAllVisits.iterator(); i.hasNext();) {
+			int auxValue = (int) i.next();
+			if (auxValue > maxValue) {
+				maxValue = auxValue;
+			}
+		}
+		// rule of 3
+		//maxValue 		 --- 100%
+		//thresholdLimit --- threshold
+		//
+		//thresholdValue = maxValue - thresholdLimit
+		int thresholdLimit = maxValue*threshold/100;
+		int thresholdValue = maxValue - thresholdLimit;
+		return thresholdValue;
+		
+	}
+
 	private boolean findDeleted(String shortName) {
 		// TODO Auto-generated method stub
 		for (int i=0; i<toDelete.size(); i++) {
@@ -431,7 +465,7 @@ public class RandomWalk {
     	}
 	    printName(nodeRoot.getFullName(), obs);
 	    visited_ant.put(nodeRoot, null); // dataset with dad child visit
-	    String tempPath = overAllPaths.get(root);
+	    String tempPath = overAllPaths.get(root);	    
 	    words.add(path); // creates a new word in the dictionary of all words
 	    
 	    tempPath = tempPath + " " + path;
@@ -704,12 +738,12 @@ public class RandomWalk {
     	
     }
 	
-	private void bagCSV() {
+	private void bagCSV(int thresholdValue) {
 		// TODO Auto-generated method stub
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
 		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
-		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
+		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -733,11 +767,13 @@ public class RandomWalk {
 			for (int j = 0; j<bags.size();j++) {
 				//line = (String) j.j.next()+",";
 				Bag b = bags.get(j);
-				line = b.getStartNode()+",";
+				int nodeNumber = b.getStartNode();
+				line = nodeNumber+",";
 				//while(j.hasNext()) {
 				i = words.iterator();
 				
 				String find = (String) b.getBag();
+				boolean keepLine = false; //keep line if at least one term is over the threshold
 				isFirst = true;
 				while(i.hasNext()) {
 					String tpath = (String) i.next();
@@ -752,11 +788,27 @@ public class RandomWalk {
 						find = find.trim(); 
 					if (find.indexOf(tpath)!=-1) { //optimistic if the node is a substring then match!
 						line+="1";
+						// check if the word found has visits over the threshold
+						// get node id by name
+						int idNode = nameNode.get(tpath);
+						// check if the name is inside the threshold
+						boolean isInsideThreshold = checkThresholdLimit(idNode,thresholdValue);
+						if (isInsideThreshold) { // if the name is inside the threshold keep the line - we need at least one nodeName inside the threshold to keep the line
+							keepLine = true;
+							System.out.println("Savior!!! "+tpath+" nodeId:"+idNode);
+						}
+						
 					} else {
 						line+="0";
 					}
 				}
-				writer.append(line+"\n");
+				if (keepLine) {
+					writer.append(line+"\n");
+				}
+				
+				else {
+					System.out.println("Skipped: "+b.getBag());
+				}
 			}
 			writer.flush();
 			writer.close();
@@ -769,11 +821,30 @@ public class RandomWalk {
 	}
 
 
+	private boolean checkThresholdLimit(int nodeNumber, int thresholdValue) {
+		// TODO Auto-generated method stub
+		
+		
+		for (int i = 0;i<overAllVisits.size();i++) {
+			if(i==nodeNumber) {
+				int value = overAllVisits.get(i);
+				if (value>=thresholdValue) {
+					return true;
+				} else {
+					System.out.println("node skipped: "+nodeNumber+" thresholdValue: "+thresholdValue+" node visits: "+ value);
+					return false;
+				}
+			}
+		}
+		System.out.println("Not found node Number!!! Error!!!");
+		return false;
+	}
+
 	private void binaryCSV() {
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
 		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
-		String fileName = pathcsv+"/visits_bin_"+name+".csv";
+		String fileName = pathcsv+"/visits_bin_"+name+"-"+turn+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -836,7 +907,7 @@ public class RandomWalk {
         
         //String fileName = System.getProperty("user.home")+"/visits_order_"+name+".csv";
         //String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_order_"+name+".csv";
-        String fileName = pathcsv+"/visits_order_"+name+".csv";
+        String fileName = pathcsv+"/visits_order_"+name+"-"+turn+".csv";
        writer = null;
         try {
 			writer = new FileWriter(fileName);
@@ -884,7 +955,7 @@ public class RandomWalk {
         
         //fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
        // String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
-        String fileName = pathcsv+"/visits_"+name+".csv";
+        String fileName = pathcsv+"/visits_"+name+"-"+turn+".csv";
        writer = null;
         try {
 			writer = new FileWriter(fileName);
@@ -903,10 +974,13 @@ public class RandomWalk {
 	        	int totalVisits = overAllVisits.get(nIDiT);
 	        	String totalPath = overAllPaths.get(nIDiT);
 	        	String cleanPath = cleanPath(totalPath);
-	        	if(this.getTrace().contentEquals("Y"))
+	        	if(this.getTrace().contentEquals("Y")) {
 
 	        		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
-	        
+	        		nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
+	        		overAllVisitsNodeName.put(formatName(nIt.getValue().getFullName()),totalVisits);
+	        	
+	        	}
 	        	writer.append(nIDiT+"");
 				writer.append(",");
 				writer.append(formatName(nIt.getValue().getFullName()));
@@ -976,7 +1050,12 @@ public class RandomWalk {
 		//if (n.getValue().getId()==290){
 		//	System.out.println(" id ="+ n.getValue().getId());
 		//}
-		if (nodeFullName.indexOf("MinCardinality")==-1&&nodeFullName.indexOf("ComplementOf")==-1&&nodeFullName.indexOf("~")==-1) {
+		if (nodeFullName.indexOf("MinCardinality")!=-1||nodeFullName.indexOf("ComplementOf")!=-1||nodeFullName.indexOf("~")!=-1||nodeFullName.indexOf("owl:Thing")!=-1) {
+	       	if(this.getTrace().contentEquals("Y"))
+
+        		System.out.println(" ShortName not considered! (complement or negation): " + nodeFullName );
+        	return "";
+		} else {
 			int initialPosition = nodeFullName.lastIndexOf("/");
 			int finalPosition = nodeFullName.lastIndexOf(">");
 			if (finalPosition == -1){
@@ -988,12 +1067,8 @@ public class RandomWalk {
 
         		System.out.println(" ShortName: " + nodeName );
 			return nodeName;
-			
-		} else {
-        	if(this.getTrace().contentEquals("Y"))
-
-        		System.out.println(" ShortName not considered (complement or negation): " + nodeFullName );
-        	return null;
+		
+ 
 		}
 			
 	}
@@ -1024,7 +1099,7 @@ public class RandomWalk {
 		printAnt = printAnt + root + ","+ formatName(rootName) + ","+ child + ","+ formatName(nodeName) + ","+ visits + ","+ path+ "\n";
 	}
 	private void printAnt(int count) {
-		 String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_ant_"+name+".csv";
+		 String fileName = pathcsv+"/visits_ant_"+name+"-"+turn+".csv";
 	     writer = null;
         
 		try {
