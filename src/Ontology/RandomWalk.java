@@ -2,7 +2,9 @@ package Ontology;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import Model.Bag;
+import Model.StatisticsUtils;
 import Model.Visit;
 
 
@@ -59,10 +62,25 @@ public class RandomWalk {
     private ArrayList toDelete = new ArrayList();
     private int turn =1;
     private int threshold = 100;
+    private int quartil = 0;
+    private String mode = "";
+    
 	private HashMap<String, Integer> nameNode = new HashMap();;
-	private HashMap<String, Integer> overAllVisitsNodeName = new HashMap();;
+	private HashMap<String, Integer> overAllVisitsNodeName = new HashMap();
+	private Set baseline = new HashSet();
 
-	
+	public void setMode(String mode) {
+		this.mode = mode;
+		
+	}
+   public int getQuartil() {
+		return quartil;
+	}
+
+	public void setQuartil(int quartil) {
+		this.quartil = quartil;
+	}
+
 	public int getThreshold() {
 		return threshold;
 	}
@@ -255,6 +273,46 @@ public class RandomWalk {
 	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
 	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
 	           
+	    if (mode.equals("BASELINE")) {
+	    	
+	    	Iterator i = (Iterator) cont.iterator();
+	    	int j = 0;
+	    	while (j<max) {
+	    		int random = (int) (Math.random()*(sumVertices));
+	    		boolean bol = baseline.add(random);
+	    		if (bol) { // selected a different number
+	    			j++;
+	    			System.out.println("j:"+ random);
+	    		}
+	    		
+	    	}
+	    	String listPy = "['";
+	    	while (i.hasNext()) {
+				Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+	        	int nID = n.getValue().getId();
+	        	int tamanho = 1;
+	    		for (Iterator k=baseline.iterator(); k.hasNext();) {
+	    			int aux = (int) k.next();
+	    			   
+	    			if (aux==nID) {
+    	        		String shortName = getShortName(n.getValue().getFullName());
+    		    		System.out.println("id:"+ nID + " name:"+  shortName);
+    		    		if (tamanho+1 < max) {
+    		    			listPy += shortName +"','";
+    		    		} else {
+    		    			listPy += shortName +"'";
+    		    		}
+    		    		tamanho ++;
+
+	    			}
+	    		}
+	    	}
+	    	listPy +="]"; 
+	    	System.out.println(listPy);
+	    	System.out.println("Running only the baseline. Leaving...");
+	    	System.exit(0);
+	    } 
+	    	
         int rwNumber = 0;
         while (rwNumber < max) {
         	Iterator i = (Iterator) cont.iterator();
@@ -384,20 +442,91 @@ public class RandomWalk {
 	
 	private int calcThresholdValue() {
 		// TODO Auto-generated method stub
-		int maxValue = 0;
+		// if quartil has a valid value, the threshold value will be the quartil + the informed threshol parameter in %.
+		// else the threshol value will be the threshold parameter (useful when you know the dataset and want a specific value)
+		Collection<Number> numbers = new ArrayList();
+	
+
 		for (Iterator i = overAllVisits.iterator(); i.hasNext();) {
-			int auxValue = (int) i.next();
-			if (auxValue > maxValue) {
-				maxValue = auxValue;
-			}
+			Number aux = (Number) i.next();
+			numbers.add(aux);
 		}
+		
+		BigDecimal qt1 = StatisticsUtils.quartile1(numbers);
+		BigDecimal qt3 = StatisticsUtils.quartile3(numbers);
+		BigDecimal avg = StatisticsUtils.average(numbers);		
+		int sizeCollection = overAllVisits.size();
+ 		BigDecimal sum = StatisticsUtils.sum(numbers);
+	
+ 		int sumInt = sum.intValue();
+		int mean = sumInt/sizeCollection;
+		
+		BigDecimal min = StatisticsUtils.minValue(numbers);
+		BigDecimal max = StatisticsUtils.maxValue(numbers);
+		BigDecimal median = StatisticsUtils.median(numbers);
+		BigDecimal dif = qt3.subtract(qt1);
+		
+    	if(this.getTrace().contentEquals("Y")) {
+    		
+    		System.out.println(" min: "+min+ " qt1: "+ qt1 + " median: " + median +" mean: " + mean + " qt3-qt1: "+ dif + " qt3: "+ qt3 + " max: "+ max + " sum: "+ sum  );
+    	}
+
+
+
+		int thresholdValue = 0;
+
+		if (quartil==1) {
+			thresholdValue = qt1.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else 
+		if (quartil==3) {
+			thresholdValue = qt3.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else
+		
+		if (quartil==2) {
+			thresholdValue = mean;
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else
+
+		if (quartil==0) {
+			thresholdValue = min.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else
+		if (quartil==4) {
+			thresholdValue = max.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else
+		
+		if (quartil==5) {
+			thresholdValue = median.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+		} else
+		
+		if (quartil==-1) {
+			thresholdValue = dif.intValue();
+			thresholdValue = thresholdValue * (1+(threshold/100));
+
+
+		} else {
+			thresholdValue = threshold;
+			
+		}
+			
+		
 		// rule of 3
 		//maxValue 		 --- 100%
 		//thresholdLimit --- threshold
 		//
-		//thresholdValue = maxValue - thresholdLimit
-		int thresholdLimit = maxValue*threshold/100;
-		int thresholdValue = maxValue - thresholdLimit;
+		//thresholdValue = maxValue - thresholdLimit;
+		//int thresholdLimit = maxValue*threshold/100;
+		//int thresholdValue = maxValue - thresholdLimit;
 		return thresholdValue;
 		
 	}
@@ -743,7 +872,7 @@ public class RandomWalk {
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
 		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
-		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+".csv";
+		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -790,12 +919,24 @@ public class RandomWalk {
 						line+="1";
 						// check if the word found has visits over the threshold
 						// get node id by name
-						int idNode = nameNode.get(tpath);
-						// check if the name is inside the threshold
-						boolean isInsideThreshold = checkThresholdLimit(idNode,thresholdValue);
-						if (isInsideThreshold) { // if the name is inside the threshold keep the line - we need at least one nodeName inside the threshold to keep the line
-							keepLine = true;
-							System.out.println("Savior!!! "+tpath+" nodeId:"+idNode);
+						if(this.getTrace().contentEquals("Y")) {
+
+			        		System.out.println("Checking tpath: "+tpath+" against: "+find);
+			        	}
+						Integer idNodeInteger = nameNode.get(tpath);
+						if (idNodeInteger!=null) {
+							
+						
+							int idNode = idNodeInteger;
+							// check if the name is inside the threshold
+							boolean isInsideThreshold = checkThresholdLimit(idNode,thresholdValue);
+							if (isInsideThreshold) { // if the name is inside the threshold keep the line - we need at least one nodeName inside the threshold to keep the line
+								keepLine = true;
+					        	if(this.getTrace().contentEquals("Y")) {
+	
+					        		System.out.println("Savior!!! "+tpath+" nodeId:"+idNode);
+					        	}
+							}
 						}
 						
 					} else {
@@ -807,7 +948,10 @@ public class RandomWalk {
 				}
 				
 				else {
-					System.out.println("Skipped: "+b.getBag());
+		        	if(this.getTrace().contentEquals("Y")) {
+
+		        		System.out.println("Skipped: "+b.getBag());
+		        	}
 				}
 			}
 			writer.flush();
@@ -829,9 +973,16 @@ public class RandomWalk {
 			if(i==nodeNumber) {
 				int value = overAllVisits.get(i);
 				if (value>=thresholdValue) {
+					if(this.getTrace().contentEquals("Y")) {
+
+		        		System.out.println("node kept: "+nodeNumber+" thresholdValue: "+thresholdValue+" node visits: "+ value);
+		        	}
 					return true;
 				} else {
-					System.out.println("node skipped: "+nodeNumber+" thresholdValue: "+thresholdValue+" node visits: "+ value);
+		        	if(this.getTrace().contentEquals("Y")) {
+
+		        		System.out.println("node skipped: "+nodeNumber+" thresholdValue: "+thresholdValue+" node visits: "+ value);
+		        	}
 					return false;
 				}
 			}
@@ -844,7 +995,7 @@ public class RandomWalk {
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
 		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_"+name+".csv";
-		String fileName = pathcsv+"/visits_bin_"+name+"-"+turn+".csv";
+		String fileName = pathcsv+"/visits_bin_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
@@ -907,7 +1058,7 @@ public class RandomWalk {
         
         //String fileName = System.getProperty("user.home")+"/visits_order_"+name+".csv";
         //String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_order_"+name+".csv";
-        String fileName = pathcsv+"/visits_order_"+name+"-"+turn+".csv";
+        String fileName = pathcsv+"/visits_order_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
        writer = null;
         try {
 			writer = new FileWriter(fileName);
@@ -955,7 +1106,7 @@ public class RandomWalk {
         
         //fileName = System.getProperty("user.home")+"/visits_"+name+".csv";
        // String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_"+name+".csv";
-        String fileName = pathcsv+"/visits_"+name+"-"+turn+".csv";
+        String fileName = pathcsv+"/visits_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
        writer = null;
         try {
 			writer = new FileWriter(fileName);
@@ -977,10 +1128,11 @@ public class RandomWalk {
 	        	if(this.getTrace().contentEquals("Y")) {
 
 	        		System.out.println(" node: " + nIDiT + " nome " + formatName(nIt.getValue().getFullName()) + " Total Visits: "+ totalVisits);
-	        		nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
-	        		overAllVisitsNodeName.put(formatName(nIt.getValue().getFullName()),totalVisits);
 	        	
 	        	}
+        		nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
+        		overAllVisitsNodeName.put(formatName(nIt.getValue().getFullName()),totalVisits);
+
 	        	writer.append(nIDiT+"");
 				writer.append(",");
 				writer.append(formatName(nIt.getValue().getFullName()));
@@ -1063,9 +1215,10 @@ public class RandomWalk {
 			}
 			String nodeName = nodeFullName.substring(initialPosition+1,finalPosition);
 			//String nodeName = n.getValue().getFullName().substring(initialPosition+1);
-        	if(this.getTrace().contentEquals("Y"))
+        	if(this.getTrace().contentEquals("Y")) {
 
-        		System.out.println(" ShortName: " + nodeName );
+        		//System.out.println(" ShortName: " + nodeName );
+        	}
 			return nodeName;
 		
  
@@ -1099,7 +1252,7 @@ public class RandomWalk {
 		printAnt = printAnt + root + ","+ formatName(rootName) + ","+ child + ","+ formatName(nodeName) + ","+ visits + ","+ path+ "\n";
 	}
 	private void printAnt(int count) {
-		 String fileName = pathcsv+"/visits_ant_"+name+"-"+turn+".csv";
+		 String fileName = pathcsv+"/visits_ant_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
 	     writer = null;
         
 		try {
@@ -1181,5 +1334,7 @@ public class RandomWalk {
 	{
 		return this.calculatedFull;
 	}
+
+	
 
 }

@@ -99,10 +99,13 @@ public class Control {
     private int forceStartNodeNummber; // number indicating the node to start always at each rw. if number > size of vertices use the ramdom 
     private String runMode; // C = class, P = properties, B = Both
     private int topItens; // number of top visited to return 
-    private int windowSize = 0;
-    private int offSet = 0;
-    private int turn = 1; // number of the turn
-    private int threshold = 1; // percent limit to consider in rw
+    private int windowSize = 0; // Number of considered nodes visits (sliding window)
+    private int offSet = 0; // next start point from the last window
+    private int turn = 1; // number of the turn -> now its part of the file path! 
+    private int quartil = 0; // percent limit to consider in rw
+
+ 	private int threshold = 1; // percent limit to consider in rw
+ 	private String mode = "RW"; // RW regular RW. BASELINE: gets the max and randomly select max (args[3]) nodes from the ontology graph.
 
     private ArrayList toDelete = new ArrayList();
      
@@ -164,17 +167,22 @@ public class Control {
 	    offSet = Integer.parseInt(args[13]);
 	    System.out.println("offSet: "+ offSet);
 
-	    turn = Integer.parseInt(args[14]);
+	    turn = Integer.parseInt(args[14]); // the turn will be added to the path
 	    System.out.println("turn: "+ turn);
 	    
-	    threshold = Integer.parseInt(args[15]);
+	    quartil = Integer.parseInt(args[15]);
+	    System.out.println("quartil: "+ quartil);
+	    
+	    threshold = Integer.parseInt(args[16]);
 	    System.out.println("threshold: "+ threshold);
-
+	    
+	    mode = args[17];
+	    
 
 	    if (turn != 1) {
 	    	pathcsv=pathcsv+turn; // add the number of the turn to the path do distinguish csv files
 	    }
-	    int k = 16; // position to start receiving the node to ignore
+	    int k = 17; // position to start receiving the nodes to ignore
 	    
 	    while(k<args.length) {
 	    	System.out.println("To Delete:"+args[k]);
@@ -202,6 +210,8 @@ public class Control {
 		rw0.setTurn(turn);
 		rw0.setToDelete(toDelete);
 		rw0.setThreshold(threshold);
+		rw0.setQuartil(quartil);
+		rw0.setMode(mode);
 
 		RandomWalk rw1 = new RandomWalk(agOnt1[1], args[4]+"_prop_"+max, max);
 		
@@ -217,7 +227,8 @@ public class Control {
 		rw1.setTurn(turn);
 		rw1.setToDelete(toDelete);
 		rw1.setThreshold(threshold);
-
+		rw1.setQuartil(quartil);
+		rw1.setMode(mode);
 
 	    
 		if (runMode.equals("B")) {		
