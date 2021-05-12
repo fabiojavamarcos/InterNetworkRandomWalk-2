@@ -115,9 +115,9 @@ public class Control {
 	 * 
 	 * @param args
 	 * args[0] = path
-	 * args[1] = number of ontologies in net1
-	 * args[2] = number of ontologies in net2
-	 * args[3..n] = name of files containing ontologies from net 1 and 2
+	 * args[1] = number of ontologies in net1 <- not used
+	 * args[2] = number of ontologies in net2 <- not used
+	 * args[3..n] = name of files containing ontologies from net 1 and 2 <- not used
 	 * 
 	 * for instance: /Users/fabiomarcosdeabreusantos/Documents/Ontologias/ 2 cmt.owl dblp.owl cmt.owl foaf.owl
 	 */
@@ -133,12 +133,12 @@ public class Control {
 		path = args[0];
 		System.out.println("path: "+ path);
 		
-		n1 = Integer.parseInt(args[1]);
-		n2 = Integer.parseInt(args[2]);
+		n1 = Integer.parseInt(args[1]); //<- not used
+		n2 = Integer.parseInt(args[2]);  // <- not used
 		System.out.println("n1 = " + n1);
 		System.out.println("n2 = " + n2);
 		
-		int max = Integer.parseInt(args[3]);
+		int max = Integer.parseInt(args[3]); // limits the RW
 		
 		pathcsv= args[5]; // where the csv are stored
 		System.out.println("path csv: "+ pathcsv);
@@ -156,27 +156,35 @@ public class Control {
 	    System.out.println("trace: "+ trace);
 
 	    forceStartNodeNummber = Integer.parseInt(args[10]);
-	    System.out.println("forceStartNodeNummber: "+ forceStartNodeNummber);
+	    System.out.println("forceStartNodeNummber: "+ forceStartNodeNummber); // start always from the same vertice (ramdom must be Y)
+		// to avoid that use a number over the last vertice size
 	    
-	    runMode = args[11];
+	    runMode = args[11];  // B (Both) C (Classes) P (Properties) T (All)
 	    System.out.println("runMode: "+ runMode);
 	    
-	    windowSize = Integer.parseInt(args[12]);
+	    windowSize = Integer.parseInt(args[12]); //Max Size of the window in slidding window
 	    System.out.println("windowSize: "+ windowSize);
 
-	    offSet = Integer.parseInt(args[13]);
+	    offSet = Integer.parseInt(args[13]); // size of the jump whem moving the window
 	    System.out.println("offSet: "+ offSet);
 
-	    turn = Integer.parseInt(args[14]); // the turn will be added to the path
+	    turn = Integer.parseInt(args[14]); // the turn will be added to the path (used when running multiples times like a chain, improving the results)
 	    System.out.println("turn: "+ turn);
 	    
-	    quartil = Integer.parseInt(args[15]);
+		// if quartil has a valid value, the threshold value will be the quartil + the informed threshold parameter in %.
+		// else the threshold value will be the absolute value to the threshold parameter (useful when you know the dataset and want a specific value)
+		// ex: quartil 1 threshold 10. Get 1st quartil more 10%
+		// ex: quartil 5 (impossible) threshold 10. !0 will be the absolute value for cut data
+		// Obs: quartil -1 = dif from quartil 3 and 1
+		// quartil 5 = median. Quartil 0 = min value.
+
+	    quartil = Integer.parseInt(args[15]); // number of the quartil to consider when deciding were to cut a random walk
 	    System.out.println("quartil: "+ quartil);
 	    
-	    threshold = Integer.parseInt(args[16]);
+	    threshold = Integer.parseInt(args[16]); //
 	    System.out.println("threshold: "+ threshold);
 	    
-	    mode = args[17];
+	    mode = args[17]; // BASELINE (generate random result for the visits. Use args[3] to determine how much results must be generated) or RUN
 	    
 
 	    if (turn != 1) {
@@ -294,7 +302,7 @@ public class Control {
 	 */
 	public void initialize() 
 	{
-		getOSType();
+		/*getOSType();
         
 		pathOnt1 = "";		
 		pathOnt2 = "";
@@ -308,7 +316,228 @@ public class Control {
 
 		HideIRI1=false;
 
-		HideIRI2=false;
+		HideIRI2=false;*/
+		/*args example:
+			/Users/fd252/Documents/dev/conferenceOAEI/
+			2
+			2
+			601
+			ekaw.owl
+			"/Users/fd252/Google Drive (fabiojavamarcos@gmail.com)/ED6/visits/data"
+			Y
+			Y
+			N
+			Y
+			9999
+			C
+			5
+			5
+			1
+			3
+			0
+			RUN*/
+		String parms [][] = new String [48][18];
+		// w = 1 o = 1 q = 1,2,3
+		parms [0][12] =		"1";
+		parms [0][13] = 	"1";
+		parms [0][15] = 	"1";
+		parms [1][12] =		"1";
+		parms [1][13] = 	"1";
+		parms [1][15] = 	"2";
+		parms [2][12] =		"1";
+		parms [2][13] = 	"1";
+		parms [2][15] = 	"3";
+		
+		// w = 2 o = 1 q = 1,2,3
+		parms [3][12] =		"2";
+		parms [3][13] = 	"1";
+		parms [3][15] = 	"1";
+		parms [4][12] =		"2";
+		parms [4][13] = 	"1";
+		parms [4][15] = 	"2";
+		parms [5][12] =		"2";
+		parms [5][13] = 	"1";
+		parms [5][15] = 	"3";
+		
+		// w = 2 o = 2 q = 1,2,3
+		parms [6][12] =		"2";
+		parms [6][13] = 	"2";
+		parms [6][15] = 	"1";
+		parms [7][12] =		"2";
+		parms [7][13] = 	"2";
+		parms [7][15] = 	"2";
+		parms [8][12] =		"2";
+		parms [8][13] = 	"2";
+		parms [8][15] = 	"3";
+
+		// w = 3 o = 1 q = 1,2,3
+		parms [9][12] =		"3";
+		parms [9][13] = 	"1";
+		parms [9][15] = 	"1";
+		parms [10][12] =	"3";
+		parms [10][13] = 	"1";
+		parms [10][15] = 	"2";
+		parms [11][12] =	"3";
+		parms [11][13] = 	"1";
+		parms [11][15] = 	"3";
+
+		// w = 3 o = 2 q = 1,2,3
+		parms [12][12] =	"3";
+		parms [12][13] = 	"2";
+		parms [12][15] = 	"1";
+		parms [13][12] =	"3";
+		parms [13][13] = 	"2";
+		parms [13][15] = 	"2";
+		parms [14][12] =	"3";
+		parms [14][13] = 	"2";
+		parms [14][15] = 	"3";
+		
+		// w = 3 o = 3 q = 1,2,3
+		parms [15][12] =	"3";
+		parms [15][13] = 	"3";
+		parms [15][15] = 	"1";
+		parms [16][12] =	"3";
+		parms [16][13] = 	"3";
+		parms [16][15] = 	"2";
+		parms [17][12] =	"3";
+		parms [17][13] = 	"3";
+		parms [17][15] = 	"3";
+
+		// w = 4 o = 1 q = 1,2,3
+		parms [18][12] =	"4";
+		parms [18][13] = 	"1";
+		parms [18][15] = 	"1";
+		parms [19][12] =	"4";
+		parms [19][13] = 	"1";
+		parms [19][15] = 	"2";
+		parms [20][12] =	"4";
+		parms [20][13] = 	"1";
+		parms [20][15] = 	"3";
+
+		// w = 4 o = 2 q = 1,2,3
+		parms [21][12] =	"4";
+		parms [21][13] = 	"2";
+		parms [21][15] = 	"1";
+		parms [22][12] =	"4";
+		parms [22][13] = 	"2";
+		parms [22][15] = 	"2";
+		parms [23][12] =	"4";
+		parms [23][13] = 	"2";
+		parms [23][15] = 	"3";
+		
+		// w = 4 o = 3 q = 1,2,3
+		parms [24][12] =	"4";
+		parms [24][13] = 	"3";
+		parms [24][15] = 	"1";
+		parms [25][12] =	"4";
+		parms [25][13] = 	"3";
+		parms [25][15] = 	"2";
+		parms [26][12] =	"4";
+		parms [26][13] = 	"3";
+		parms [26][15] = 	"3";
+
+		// w = 4 o = 4 q = 1,2,3
+		parms [27][12] =	"4";
+		parms [27][13] = 	"4";
+		parms [27][15] = 	"1";
+		parms [28][12] =	"4";
+		parms [28][13] = 	"4";
+		parms [28][15] = 	"2";
+		parms [29][12] =	"4";
+		parms [29][13] = 	"4";
+		parms [29][15] = 	"3";
+
+		// w = 5 o = 1 q = 1,2,3
+		parms [30][12] =	"5";
+		parms [30][13] = 	"1";
+		parms [30][15] = 	"1";
+		parms [31][12] =	"5";
+		parms [31][13] = 	"1";
+		parms [31][15] = 	"2";
+		parms [32][12] =	"5";
+		parms [32][13] = 	"1";
+		parms [32][15] = 	"3";
+
+		// w = 5 o = 2 q = 1,2,3
+		parms [33][12] =	"5";
+		parms [33][13] = 	"2";
+		parms [33][15] = 	"1";
+		parms [34][12] =	"5";
+		parms [34][13] = 	"2";
+		parms [34][15] = 	"2";
+		parms [35][12] =	"5";
+		parms [35][13] = 	"2";
+		parms [35][15] = 	"3";
+
+		// w = 5 o = 3 q = 1,2,3
+		parms [36][12] =	"5";
+		parms [36][13] = 	"3";
+		parms [36][15] = 	"1";
+		parms [37][12] =	"5";
+		parms [37][13] = 	"3";
+		parms [37][15] = 	"2";
+		parms [38][12] =	"5";
+		parms [38][13] = 	"3";
+		parms [38][15] = 	"3";
+
+		// w = 5 o = 4 q = 1,2,3
+		parms [39][12] =	"5";
+		parms [39][13] = 	"4";
+		parms [39][15] = 	"1";
+		parms [40][12] =	"5";
+		parms [40][13] = 	"4";
+		parms [40][15] = 	"2";
+		parms [41][12] =	"5";
+		parms [41][13] = 	"4";
+		parms [41][15] = 	"3";
+
+		// w = 5 o = 5 q = 1,2,3
+		parms [42][12] =	"5";
+		parms [42][13] = 	"5";
+		parms [42][15] = 	"1";
+		parms [43][12] =	"5";
+		parms [43][13] = 	"5";
+		parms [43][15] = 	"2";
+		parms [44][12] =	"5";
+		parms [44][13] = 	"5";
+		parms [44][15] = 	"3";
+
+		// w = 6 o = 1 q = 1,2,3
+		parms [45][12] =	"6";
+		parms [45][13] = 	"1";
+		parms [45][15] = 	"1";
+		parms [46][12] =	"6";
+		parms [46][13] = 	"1";
+		parms [46][15] = 	"2";
+		parms [47][12] =	"6";
+		parms [47][13] = 	"1";
+		parms [47][15] = 	"3";
+
+		for (int i = 0; i <48; i++) {
+			
+		
+			parms [i][0] = "/Users/fd252/Documents/dev/conferenceOAEI/";
+			parms [i][1] = 		"2";
+			parms [i][2] =		"2";
+			parms [i][3] =		"601";
+			parms [i][4] = 		"iasted.owl";
+			parms [i][5] = 		"/Users/fd252/Google Drive (fabiojavamarcos@gmail.com)/ED6/visits/data";
+			parms [i][6] = 		"Y";
+			parms [i][7] = 		"Y";
+			parms [i][8] =		"N";
+			parms [i][9] =		"Y";
+			parms [i][10] =		"9999";
+			parms [i][11] = 	"C";
+			//parms [i][12] =	"5";
+			//parms [i][13] = 	"5";
+			parms [i][14] = 	"1";
+			//parms [i][15] = 	"3";
+			parms [i][16] = 	"0";
+			parms [i][17] = 	"RUN";
+			
+			System.out.println("Calling: "+ parms[1]);
+			batch(parms[i]);
+		}
 
 	}
 	

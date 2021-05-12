@@ -11,7 +11,12 @@ public class Main {
 		if (args == null){
 			control.initialize();
 		} else {
-			control.batch(args);
+			if (args[18].equals("initialize")) {
+				control.initialize();
+			}
+			else {
+				control.batch(args);
+			}
 		}
 
 	}

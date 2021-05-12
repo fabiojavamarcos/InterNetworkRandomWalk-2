@@ -268,6 +268,23 @@ public class RandomWalk {
 	public HashMap fullrw()
 	{
 		Set cont = g.getVertices().entrySet();
+		Iterator k1 = (Iterator) cont.iterator();
+		int maxLevel = 0;
+		while(k1.hasNext()) {
+        	Map.Entry<Integer, Node> no = (Map.Entry<Integer, Node>) k1.next();
+        	// shows level
+        	int level = no.getValue().getLevel();
+        	if (maxLevel < level) {
+        		maxLevel = level;
+        	}
+        	
+        	int nID = no.getValue().getId();
+			String shortName = getShortName(no.getValue().getFullName());
+	    	System.out.println("id:"+ nID + " name:"+  shortName + "Level:"+ level);
+	    		 
+
+		}
+		System.out.println("Max Level: "+ maxLevel);
 		int sumVertices = cont.size();
 	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
@@ -332,6 +349,9 @@ public class RandomWalk {
 	        while(i.hasNext()) 
 	        {
 	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+	        	// shows level
+	        	int level = n.getValue().getLevel();
+	        	
 	        	int nID = n.getValue().getId();
     			String shortName = getShortName(n.getValue().getFullName());
     			if (shortName!="") {
@@ -340,7 +360,7 @@ public class RandomWalk {
 			        	if (countEntries == randomInit){ //random start
 			        		if (getTurn()>1) {
 			        			if (!findDeleted(shortName)) {
-					        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+					        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit + "Level:" + level );
 					        		rw(nID, rwNumber);
 					        		//printVisitOrder(count);
 					        		//printFrequency(count, cont);
@@ -442,8 +462,12 @@ public class RandomWalk {
 	
 	private int calcThresholdValue() {
 		// TODO Auto-generated method stub
-		// if quartil has a valid value, the threshold value will be the quartil + the informed threshol parameter in %.
-		// else the threshol value will be the threshold parameter (useful when you know the dataset and want a specific value)
+		// if quartil has a valid value, the threshold value will be the quartil + the informed threshold parameter in %.
+		// else the threshold value will be the absolute value to the threshold parameter (useful when you know the dataset and want a specific value)
+		// ex: quartil 1 threshold 10. Get 1st quartil more 10%
+		// ex: quartil 5 (impossible) threshold 10. !0 will be the absolute value for cut data
+		// Obs: quartil -1 = dif from quartil 3 and 1
+		// quartil 5 = median. Quartil 0 = min value.
 		Collection<Number> numbers = new ArrayList();
 	
 
@@ -872,7 +896,12 @@ public class RandomWalk {
 		Iterator i = words.iterator();
 		//Iterator j = overAllPaths.iterator();
 		//String fileName = "/Users/fd252/Dropbox/UniRio/ED5/visits/data"+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+".csv";
+	
 		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
+
+		if (mode.equals("BASELINE")) {
+			 fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+"-"+quartil+"-"+threshold+"_"+mode+".csv";
+		}
 		writer = null;
 		try {
 			writer = new FileWriter(fileName);
