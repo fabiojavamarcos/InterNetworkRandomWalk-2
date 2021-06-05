@@ -286,49 +286,79 @@ public class RandomWalk {
 		}
 		System.out.println("Max Level: "+ maxLevel);
 		int sumVertices = cont.size();
-	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
+ 	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
 	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
 	           
-	    if (mode.equals("BASELINE")) {
+	    if (mode.equals("BASELINE1")) {
 	    	
-	    	Iterator i = (Iterator) cont.iterator();
-	    	int j = 0;
-	    	while (j<max) {
-	    		int random = (int) (Math.random()*(sumVertices));
-	    		boolean bol = baseline.add(random);
-	    		if (bol) { // selected a different number
-	    			j++;
-	    			System.out.println("j:"+ random);
+	    	//if (max < 30){//  if > 30 there is no ref alignemnt with that size means to generate the files intead of only 1 list as baseline 
+		    	Iterator i = (Iterator) cont.iterator();
+		    	int j = 0;
+		    	while (j<max) {
+		    		int random = (int) (Math.random()*(sumVertices));
+		    		boolean bol = baseline.add(random);
+		    		if (bol) { // selected a different number
+		    			j++;
+		    			System.out.println("j:"+ random);
+		    		}
+		    		
+		    	}
+		    	String listPy = "['";
+		    	while (i.hasNext()) {
+					Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+		        	int nID = n.getValue().getId();
+		        	int tamanho = 1;
+		    		for (Iterator k=baseline.iterator(); k.hasNext();) {
+		    			int aux = (int) k.next();
+		    			   
+		    			if (aux==nID) {
+	    	        		String shortName = getShortName(n.getValue().getFullName());
+	    		    		System.out.println("id:"+ nID + " name:"+  shortName);
+	    		    		if (tamanho+1 < max) {
+	    		    			listPy += shortName +"','";
+	    		    		} else {
+	    		    			listPy += shortName +"'";
+	    		    		}
+	    		    		tamanho ++;
+	
+		    			}
+		    		}
+		    	}
+		    	listPy +="]"; 
+		    	System.out.println(listPy);
+		    	System.out.println("Running only the baseline SIMPLE STRING. Leaving...");
+		    	System.exit(0);
+		    	
+	    	} // BASELINE2
+	    	else { // create bin bags for baseline
+	    		 Iterator it = (Iterator) cont.iterator();
+	    		 while (it.hasNext()) {
+	    			 Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
+	    			 int nIDiT = nIt.getValue().getId();
+	    			 nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
+	    			 words.add(formatName(nIt.getValue().getFullName()));
+	    		 }
+	    		for (int i = 0; i < max; i++) { // "RW" fake to create baseline
+	    			int height = 3;
+	    			int randomVisits = (int) (Math.random()*(height)+1);
+	    			//for (int j = 0; j<randomVisits; j ++ ) {
+	    			visitRWLap = new ArrayList();// erase each lap. 
+	    			baseline = new HashSet();// erase each lap. 
+    				String listPy = createBaseline(max,cont,sumVertices,randomVisits);
+    				System.out.println(listPy);
+    				windowSize = randomVisits; // fake window size
+    		    	genRWBags(0);
+	    			//}
+	    			
+	    			
 	    		}
-	    		
 	    	}
-	    	String listPy = "['";
-	    	while (i.hasNext()) {
-				Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
-	        	int nID = n.getValue().getId();
-	        	int tamanho = 1;
-	    		for (Iterator k=baseline.iterator(); k.hasNext();) {
-	    			int aux = (int) k.next();
-	    			   
-	    			if (aux==nID) {
-    	        		String shortName = getShortName(n.getValue().getFullName());
-    		    		System.out.println("id:"+ nID + " name:"+  shortName);
-    		    		if (tamanho+1 < max) {
-    		    			listPy += shortName +"','";
-    		    		} else {
-    		    			listPy += shortName +"'";
-    		    		}
-    		    		tamanho ++;
-
-	    			}
-	    		}
-	    	}
-	    	listPy +="]"; 
-	    	System.out.println(listPy);
-	    	System.out.println("Running only the baseline. Leaving...");
+	    	bagCSV(-1); // 10000 = fake threshold
+	    	System.out.println("Running only the baseline with files.. Leaving...");
 	    	System.exit(0);
-	    } 
+
+	    //} 
 	    	
         int rwNumber = 0;
         while (rwNumber < max) {
@@ -459,7 +489,45 @@ public class RandomWalk {
         //	System.out.println(" node: " + i + " nome " + cont.get(i).getFullName());
         //}
 	}
-	
+	private String createBaseline(int max, Set cont, int sumVertices, int height) {
+    	Iterator i = (Iterator) cont.iterator();
+    	int j = 0;
+
+    	while (j<height) {
+    		int random = (int) (Math.random()*(sumVertices));
+    		boolean bol = baseline.add(random);
+    		if (bol) { // selected a different number
+    			j++;
+    			System.out.println("j:"+ random);
+    		}
+    		
+    	}
+    	String listPy = "['";
+    	while (i.hasNext()) {
+			Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+        	int nID = n.getValue().getId();
+        	int tamanho = 1;
+    		for (Iterator k=baseline.iterator(); k.hasNext();) {
+    			int aux = (int) k.next();
+    			   
+    			if (aux==nID) {
+	        		String shortName = getShortName(n.getValue().getFullName());
+		    		System.out.println("id:"+ nID + " name:"+  shortName);
+		    		visitRWLap.add(shortName);
+		    		//words.add(shortName);
+		    		if (tamanho+1 < max) {
+		    			listPy += shortName +"','";
+		    		} else {
+		    			listPy += shortName +"'";
+		    		}
+		    		tamanho ++;
+
+    			}
+    		}
+    	}
+    	return listPy;
+    	//return visitRWLap;
+	}
 	private int calcThresholdValue() {
 		// TODO Auto-generated method stub
 		// if quartil has a valid value, the threshold value will be the quartil + the informed threshold parameter in %.
@@ -899,7 +967,7 @@ public class RandomWalk {
 	
 		String fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+"-"+quartil+"-"+threshold+".csv";
 
-		if (mode.equals("BASELINE")) {
+		if (mode.equals("BASELINE1")||mode.equals("BASELINE2")) {
 			 fileName = pathcsv+"/visits_bin_bag_"+windowSize+"_"+offSet+"_"+name+"-"+turn+"-"+quartil+"-"+threshold+"_"+mode+".csv";
 		}
 		writer = null;

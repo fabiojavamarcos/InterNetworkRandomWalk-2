@@ -520,7 +520,7 @@ public class Control {
 			parms [i][1] = 		"2";
 			parms [i][2] =		"2";
 			parms [i][3] =		"601";
-			parms [i][4] = 		"iasted.owl";
+			parms [i][4] = 		"confof.owl";
 			parms [i][5] = 		"/Users/fd252/Google Drive (fabiojavamarcos@gmail.com)/ED6/visits/data";
 			parms [i][6] = 		"Y";
 			parms [i][7] = 		"Y";
