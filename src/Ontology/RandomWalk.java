@@ -331,7 +331,7 @@ public class RandomWalk {
 		    	System.exit(0);
 		    	
 	    	} // BASELINE2
-	    	else { // create bin bags for baseline
+	    	if (mode.equals("BASELINE2")) { // create bin bags for baseline 
 	    		 Iterator it = (Iterator) cont.iterator();
 	    		 while (it.hasNext()) {
 	    			 Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
@@ -353,12 +353,12 @@ public class RandomWalk {
 	    			
 	    			
 	    		}
-	    	}
+	    	//}
 	    	bagCSV(-1); // 10000 = fake threshold
 	    	System.out.println("Running only the baseline with files.. Leaving...");
 	    	System.exit(0);
 
-	    //} 
+	    } 
 	    	
         int rwNumber = 0;
         while (rwNumber < max) {

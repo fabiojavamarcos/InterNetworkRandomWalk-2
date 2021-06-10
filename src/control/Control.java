@@ -190,7 +190,7 @@ public class Control {
 	    if (turn != 1) {
 	    	pathcsv=pathcsv+turn; // add the number of the turn to the path do distinguish csv files
 	    }
-	    int k = 17; // position to start receiving the nodes to ignore
+	    int k = 18; // position to start receiving the nodes to ignore
 	    
 	    while(k<args.length) {
 	    	System.out.println("To Delete:"+args[k]);
@@ -519,9 +519,9 @@ public class Control {
 			parms [i][0] = "/Users/fd252/Documents/dev/conferenceOAEI/";
 			parms [i][1] = 		"2";
 			parms [i][2] =		"2";
-			parms [i][3] =		"601";
-			parms [i][4] = 		"confof.owl";
-			parms [i][5] = 		"/Users/fd252/Google Drive (fabiojavamarcos@gmail.com)/ED6/visits/data";
+			parms [i][3] =		"1040";
+			parms [i][4] = 		"edas.owl";
+			parms [i][5] = 		"/Users/fd252/Google Drive (fabiojavamarcos@gmail.com)/ED6/visits/OldVersion/data";
 			parms [i][6] = 		"Y";
 			parms [i][7] = 		"Y";
 			parms [i][8] =		"N";
