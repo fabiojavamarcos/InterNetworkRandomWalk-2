@@ -280,214 +280,218 @@ public class RandomWalk {
         	
         	int nID = no.getValue().getId();
 			String shortName = getShortName(no.getValue().getFullName());
-	    	System.out.println("id:"+ nID + " name:"+  shortName + "Level:"+ level);
+	    	//System.out.println("id:"+ nID + " name:"+  shortName + "Level:"+ level);
 	    		 
 
 		}
-		System.out.println("Max Level: "+ maxLevel);
+		//System.out.println("Max Level: "+ maxLevel);
 		int sumVertices = cont.size();
  	    overAllVisits = new ArrayList<Integer>(Collections.nCopies(this.numVertices, 0));
 	    overAllPaths  = new ArrayList<String>(Collections.nCopies(this.numVertices, " "));
 	    //String fileName = System.getProperty("user.home")+"/visits_ant_"+name+".csv";
 	           
 	    if (mode.equals("BASELINE1")) {
-	    	
+	    	for (int x=0;x<10;x++) {
 	    	//if (max < 30){//  if > 30 there is no ref alignemnt with that size means to generate the files intead of only 1 list as baseline 
 		    	Iterator i = (Iterator) cont.iterator();
+		    	baseline = new HashSet();
 		    	int j = 0;
 		    	while (j<max) {
 		    		int random = (int) (Math.random()*(sumVertices));
 		    		boolean bol = baseline.add(random);
 		    		if (bol) { // selected a different number
 		    			j++;
-		    			System.out.println("j:"+ random);
+		    			//System.out.println("j:"+ random);
 		    		}
 		    		
 		    	}
 		    	String listPy = "['";
+		    	int tamanho = 1;
 		    	while (i.hasNext()) {
 					Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
 		        	int nID = n.getValue().getId();
-		        	int tamanho = 1;
+		        	
 		    		for (Iterator k=baseline.iterator(); k.hasNext();) {
 		    			int aux = (int) k.next();
 		    			   
 		    			if (aux==nID) {
 	    	        		String shortName = getShortName(n.getValue().getFullName());
-	    		    		System.out.println("id:"+ nID + " name:"+  shortName);
-	    		    		if (tamanho+1 < max) {
+	    		    		//System.out.println("id:"+ nID + " name:"+  shortName);
+	    		    		if (tamanho < max) {
 	    		    			listPy += shortName +"','";
+	        		    		tamanho ++;
 	    		    		} else {
 	    		    			listPy += shortName +"'";
 	    		    		}
-	    		    		tamanho ++;
 	
 		    			}
+
 		    		}
 		    	}
 		    	listPy +="]"; 
 		    	System.out.println(listPy);
-		    	System.out.println("Running only the baseline SIMPLE STRING. Leaving...");
-		    	System.exit(0);
-		    	
-	    	} // BASELINE2
-	    	if (mode.equals("BASELINE2")) { // create bin bags for baseline 
-	    		 Iterator it = (Iterator) cont.iterator();
-	    		 while (it.hasNext()) {
-	    			 Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
-	    			 int nIDiT = nIt.getValue().getId();
-	    			 nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
-	    			 words.add(formatName(nIt.getValue().getFullName()));
-	    		 }
-	    		for (int i = 0; i < max; i++) { // "RW" fake to create baseline
-	    			int height = 3;
-	    			int randomVisits = (int) (Math.random()*(height)+1);
-	    			//for (int j = 0; j<randomVisits; j ++ ) {
-	    			visitRWLap = new ArrayList();// erase each lap. 
-	    			baseline = new HashSet();// erase each lap. 
-    				String listPy = createBaseline(max,cont,sumVertices,randomVisits);
-    				System.out.println(listPy);
-    				windowSize = randomVisits; // fake window size
-    		    	genRWBags(0);
-	    			//}
-	    			
-	    			
-	    		}
-	    	//}
-	    	bagCSV(-1); // 10000 = fake threshold
-	    	System.out.println("Running only the baseline with files.. Leaving...");
+	    	}
+	    	System.out.println("Running only the baseline SIMPLE STRING. Leaving...");
 	    	System.exit(0);
 
-	    } 
+    	} // BASELINE2
+    	if (mode.equals("BASELINE2")) { // create bin bags for baseline 
+    		 Iterator it = (Iterator) cont.iterator();
+    		 while (it.hasNext()) {
+    			 Map.Entry<Integer, Node> nIt = (Map.Entry<Integer, Node>) it.next();
+    			 int nIDiT = nIt.getValue().getId();
+    			 nameNode.put(formatName(nIt.getValue().getFullName()),nIDiT);
+    			 words.add(formatName(nIt.getValue().getFullName()));
+    		 }
+    		for (int i = 0; i < max; i++) { // "RW" fake to create baseline
+    			int height = 3;
+    			int randomVisits = (int) (Math.random()*(height)+1);
+    			//for (int j = 0; j<randomVisits; j ++ ) {
+    			visitRWLap = new ArrayList();// erase each lap. 
+    			baseline = new HashSet();// erase each lap. 
+				String listPy = createBaseline(max,cont,sumVertices,randomVisits);
+				System.out.println(listPy);
+				windowSize = randomVisits; // fake window size
+		    	genRWBags(0);
+    			//}
+    			
+    			
+    		}
+    	//}
+    	bagCSV(-1); // 10000 = fake threshold
+    	System.out.println("Running only the baseline with files.. Leaving...");
+    	System.exit(0);
+
+    } 
 	    	
-        int rwNumber = 0;
-        while (rwNumber < max) {
-        	Iterator i = (Iterator) cont.iterator();
-        	int countEntries = 0;
-        	//int randomInit = (int) (Math.random()*(sumVertices-1))+1;
-        	randomInit = (int) (Math.random()*(sumVertices));
+    int rwNumber = 0;
+    while (rwNumber < max) {
+    	Iterator i = (Iterator) cont.iterator();
+    	int countEntries = 0;
+    	//int randomInit = (int) (Math.random()*(sumVertices-1))+1;
+    	randomInit = (int) (Math.random()*(sumVertices));
+    	
+    	if(this.getForceStartNodeNummber()<sumVertices) {
+    		randomInit = this.getForceStartNodeNummber(); // start always from the same vertice (ramdom must be Y)
+    		// to avoid that use a number over the last vertice size
+    	}
+    	if(this.getTrace().contentEquals("Y")) {
+    		System.out.println("rw number: "+ rwNumber);
+    		System.out.println(" Count Entries "+countEntries);
+    		System.out.println(" randomInit "+ randomInit);
+    	}
+        while(i.hasNext()) 
+        {
+        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
+        	// shows level
+        	int level = n.getValue().getLevel();
         	
-        	if(this.getForceStartNodeNummber()<sumVertices) {
-        		randomInit = this.getForceStartNodeNummber(); // start always from the same vertice (ramdom must be Y)
-        		// to avoid that use a number over the last vertice size
-        	}
-        	if(this.getTrace().contentEquals("Y")) {
-        		System.out.println("rw number: "+ rwNumber);
-        		System.out.println(" Count Entries "+countEntries);
-        		System.out.println(" randomInit "+ randomInit);
-        	}
-	        while(i.hasNext()) 
-	        {
-	        	Map.Entry<Integer, Node> n = (Map.Entry<Integer, Node>) i.next();
-	        	// shows level
-	        	int level = n.getValue().getLevel();
-	        	
-	        	int nID = n.getValue().getId();
-    			String shortName = getShortName(n.getValue().getFullName());
-    			if (shortName!="") {
-	        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
-		        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
-			        	if (countEntries == randomInit){ //random start
-			        		if (getTurn()>1) {
-			        			if (!findDeleted(shortName)) {
-					        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit + "Level:" + level );
-					        		rw(nID, rwNumber);
-					        		//printVisitOrder(count);
-					        		//printFrequency(count, cont);
-					        		//printAnt(count);
-					        		genRWBags(rwNumber);
-			        			}
-			        		} else {
-				        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+        	int nID = n.getValue().getId();
+			String shortName = getShortName(n.getValue().getFullName());
+			if (shortName!="") {
+        	//System.out.println("id: "+ nID + " name: " + n.getValue().getFullName());
+	        	if (this.getRandomizeFirstNodeEachRW().equals("Y")) {
+		        	if (countEntries == randomInit){ //random start
+		        		if (getTurn()>1) {
+		        			if (!findDeleted(shortName)) {
+				        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit + "Level:" + level );
 				        		rw(nID, rwNumber);
 				        		//printVisitOrder(count);
 				        		//printFrequency(count, cont);
 				        		//printAnt(count);
 				        		genRWBags(rwNumber);
-	
-			        		}
-			        	}
-		        	}
-			        else {
-		        		if (getTurn()>1) {
-//		        			String shortName = getShortName(n.getValue().getFullName());
-		        			if (!findDeleted(shortName)) {
-	
-					        	printName(n.getValue().getFullName(), nID+"");
-				        		rw(nID, rwNumber);
 		        			}
-		        		}else {
+		        		} else {
+			        		printName(n.getValue().getFullName(), "node ID: "+  nID+" randomInit: "+randomInit);
+			        		rw(nID, rwNumber);
+			        		//printVisitOrder(count);
+			        		//printFrequency(count, cont);
+			        		//printAnt(count);
+			        		genRWBags(rwNumber);
+
+		        		}
+		        	}
+	        	}
+		        else {
+	        		if (getTurn()>1) {
+//		        			String shortName = getShortName(n.getValue().getFullName());
+	        			if (!findDeleted(shortName)) {
+
 				        	printName(n.getValue().getFullName(), nID+"");
 			        		rw(nID, rwNumber);
-	
-		        		}
-			        }
-    			}
-				this.calculated[nID] += 1;
-				countEntries++;
-	        }
-	        rwNumber ++;
+	        			}
+	        		}else {
+			        	printName(n.getValue().getFullName(), nID+"");
+		        		rw(nID, rwNumber);
+
+	        		}
+		        }
+			}
+			this.calculated[nID] += 1;
+			countEntries++;
         }
-        int thresholdValue = calcThresholdValue();
-        printVisitOrder(max);
-		printFrequency(max, cont);
-		binaryCSV();
-		bagCSV(thresholdValue);
+        rwNumber ++;
+    }
+    int thresholdValue = calcThresholdValue();
+    printVisitOrder(max);
+	printFrequency(max, cont);
+	binaryCSV();
+	bagCSV(thresholdValue);
 
-		printAnt(max);
-        this.calculatedFull = true;
-        // fecha o arquivo de ordem de visita
-		try {
-			writer.flush();
-			writer.close();
+	printAnt(max);
+    this.calculatedFull = true;
+    // fecha o arquivo de ordem de visita
+	try {
+		writer.flush();
+		writer.close();
 
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		Collections.sort(overAllVisits);
-		ArrayList<Integer> top3 = new ArrayList<Integer>(overAllVisits.subList(overAllVisits.size() -3, overAllVisits.size()));
-		return visited_ant;
+	} catch (IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+	
+	
+	Collections.sort(overAllVisits);
+	ArrayList<Integer> top3 = new ArrayList<Integer>(overAllVisits.subList(overAllVisits.size() -3, overAllVisits.size()));
+	return visited_ant;
 
-		
-	    //return returnTop(max,cont,top);
+	
+    //return returnTop(max,cont,top);
  
         
         // print the visit chain root and child
-        /*
-        cont = visited_ant.entrySet();
-        it = (Iterator) cont.iterator();
-        fileName = System.getProperty("user.home")+"/visits_ant.csv";
-        writer = null;
-        try {
-			writer = new FileWriter(fileName);
-			writer.append("root");
-			writer.append(",");
-			writer.append("child\n");
-	        while (it.hasNext()) {
-	        	Map.Entry<Node, Node> nIt = (Map.Entry<Node, Node>) it.next();
-	        	int nIDiT = nIt.getValue().getId();
-	        	int nKey  = nIt.getKey().getId();
-	        	
-	        	System.out.println(" root " + formatName(nIt.getKey().getFullName()) + "followed by child" + formatName(nIt.getValue().getFullName()));
-	        
-					writer.append(formatName(nIt.getKey().getFullName()));
-					writer.append(",");
-					writer.append(formatName(nIt.getValue().getFullName()));
-	        	
-	        }
+    /*
+    cont = visited_ant.entrySet();
+    it = (Iterator) cont.iterator();
+    fileName = System.getProperty("user.home")+"/visits_ant.csv";
+    writer = null;
+    try {
+		writer = new FileWriter(fileName);
+		writer.append("root");
+		writer.append(",");
+		writer.append("child\n");
+        while (it.hasNext()) {
+        	Map.Entry<Node, Node> nIt = (Map.Entry<Node, Node>) it.next();
+        	int nIDiT = nIt.getValue().getId();
+        	int nKey  = nIt.getKey().getId();
+        	
+        	System.out.println(" root " + formatName(nIt.getKey().getFullName()) + "followed by child" + formatName(nIt.getValue().getFullName()));
         
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} */
-        //for (int i = 0; i < overAllVisits.size(); i++) {
-        //	System.out.println(" node: " + i + " nome " + cont.get(i).getFullName());
-        //}
+				writer.append(formatName(nIt.getKey().getFullName()));
+				writer.append(",");
+				writer.append(formatName(nIt.getValue().getFullName()));
+        	
+        }
+    
+		writer.flush();
+		writer.close();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} */
+    //for (int i = 0; i < overAllVisits.size(); i++) {
+    //	System.out.println(" node: " + i + " nome " + cont.get(i).getFullName());
+    //}
 	}
 	private String createBaseline(int max, Set cont, int sumVertices, int height) {
     	Iterator i = (Iterator) cont.iterator();
@@ -1300,11 +1304,12 @@ public class RandomWalk {
 		//	System.out.println(" id ="+ n.getValue().getId());
 		//}
 		if (nodeFullName.indexOf("MinCardinality")!=-1||nodeFullName.indexOf("ComplementOf")!=-1||nodeFullName.indexOf("~")!=-1||nodeFullName.indexOf("owl:Thing")!=-1) {
-	       	if(this.getTrace().contentEquals("Y"))
-
-        		System.out.println(" ShortName not considered! (complement or negation): " + nodeFullName );
-        	return "";
-		} else {
+	       	if(this.getTrace().contentEquals("Y")) {
+	       		
+        		//System.out.println(" ShortName not considered! (complement or negation): " + nodeFullName );
+	       	}
+	       	//return "";
+		} //else {
 			int initialPosition = nodeFullName.lastIndexOf("/");
 			int finalPosition = nodeFullName.lastIndexOf(">");
 			if (finalPosition == -1){
@@ -1319,7 +1324,7 @@ public class RandomWalk {
 			return nodeName;
 		
  
-		}
+		//}
 			
 	}
 

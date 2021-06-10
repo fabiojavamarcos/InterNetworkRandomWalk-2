@@ -11,10 +11,10 @@ public class Main {
 		if (args == null){
 			control.initialize();
 		} else {
-			if (args[18].equals("BASELINE1")||args[18].equals("BASELINE2")) {
+			if (args[17].equals("BASELINE1")||args[17].equals("BASELINE2")) {
 				control.batch(args);
 			} else {
-				if (args[19].equals("initialize")) {
+				if (args[18].equals("initialize")) {
 					control.initialize();
 				}
 				else {
