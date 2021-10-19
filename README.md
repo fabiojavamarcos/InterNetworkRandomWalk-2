@@ -7,14 +7,21 @@ Arguments:
 	 *  function that run in batch loading ontologies from args
 	 * 
 	 * @param args
+	 
 	 * args[0] = path
+	 
 	 * args[1] = number of ontologies in net1 <- not used
+	 
 	 * args[2] = number of ontologies in net2 <- not used
+	 
 	 * args[3] = limits the RW (number of RW)
+	 
    * args[4] = name of ontology
+   * 
 	 * 
 	 * 
 	 */
+	 
    args - argument name // semantic
    5 - pathcsv// path to write csvs 
    6 - breakIfBackToNode // Y = do not use the link to itself
